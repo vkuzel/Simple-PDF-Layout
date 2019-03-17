@@ -37,6 +37,7 @@ public class Table<T extends Table<T>> extends Box<T> {
 
         for (int row = 0; row < data.size(); row++) {
             List<Text> cells = new ArrayList<>(noOfColumns);
+            float offsetX = 0;
             float rowHeight = 0;
 
             for (int column = 0; column < data.get(row).size(); column++) {
@@ -45,10 +46,11 @@ public class Table<T extends Table<T>> extends Box<T> {
                 this.addChild(cell);
                 cellDecorator.decorate(noOfRows, noOfColumns, row + 1, column + 1, cell);
 
-                Dimension cellDimension = cell.calculateDimension();
-                float cellX = cellDimension.getWidth() * column;
+                float cellX = offsetX;
                 float cellY = rowsHeight;
 
+                Dimension cellDimension = cell.calculateDimension();
+                offsetX += cellDimension.getWidth();
                 rowHeight = Math.max(rowHeight, cellDimension.getHeight());
 
                 cell.setTopLeft(cellX, cellY);
