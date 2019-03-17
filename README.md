@@ -2,7 +2,7 @@
 
 [![](https://jitpack.io/v/vkuzel/Simple-PDF-Layout.svg)](https://jitpack.io/#vkuzel/Simple-PDF-Layout)
 
-A library ,akes easier to manually create a simple PDF document with [Apache PDFBox](https://pdfbox.apache.org) library.
+A library which makes it easier to manually create a simple PDF document with [Apache PDFBox](https://pdfbox.apache.org).
 
 ## Features
 
@@ -21,7 +21,7 @@ A library ,akes easier to manually create a simple PDF document with [Apache PDF
     }
     
     dependencies {
-        compile("com.github.vkuzel:Simple-PDF-Layout:1.0.0")
+        compile("com.github.vkuzel:Simple-PDF-Layout:1.1.0")
     }
     ```
 

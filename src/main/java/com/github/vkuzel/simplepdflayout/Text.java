@@ -4,6 +4,7 @@ import com.github.vkuzel.simplepdflayout.geometry.Dimension;
 import com.github.vkuzel.simplepdflayout.geometry.Point;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.awt.*;
@@ -18,7 +19,7 @@ public class Text<T extends Text<T>> extends Box<T> {
     }
 
     protected List<String> lines;
-    protected PDType1Font font = PDType1Font.HELVETICA;
+    protected PDFont font = PDType1Font.HELVETICA;
     protected float fontSize = 11;
     protected float lineHeight = 11.65f;
     protected Alignment alignment;
@@ -29,7 +30,7 @@ public class Text<T extends Text<T>> extends Box<T> {
         return getThis();
     }
 
-    public T setFont(PDType1Font font) {
+    public T setFont(PDFont font) {
         this.font = font;
         return getThis();
     }
