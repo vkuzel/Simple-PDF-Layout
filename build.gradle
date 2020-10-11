@@ -7,7 +7,7 @@ repositories {
 }
 
 dependencies {
-    compile("org.apache.pdfbox:pdfbox:2.0.4")
+    compile("org.apache.pdfbox:pdfbox:2.0.21")
     testCompile("junit:junit:4.12")
 }
 
