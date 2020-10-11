@@ -164,6 +164,9 @@ public class Text<T extends Text<T>> extends Box<T> {
                 buffer = potentialBuffer;
             }
         }
+        if (!buffer.isEmpty()) {
+            lines.add(buffer);
+        }
 
         return lines;
     }

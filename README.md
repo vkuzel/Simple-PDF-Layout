@@ -21,7 +21,7 @@ A library which makes it easier to manually create a simple PDF document with [A
     }
     
     dependencies {
-        compile("com.github.vkuzel:Simple-PDF-Layout:1.2.0")
+        compile("com.github.vkuzel:Simple-PDF-Layout:1.2.1")
     }
     ```
 
