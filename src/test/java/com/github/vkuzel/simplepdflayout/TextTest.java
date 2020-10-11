@@ -8,9 +8,12 @@ public class TextTest {
     @Test
     public void textIsProperlyWrapped() {
         // given
+        float firstLineOffset = 30;
         float maxWidth = 60;
         Text<?> text = new Text<>()
-                .setAndWrapText("XXX XXX XXX XXX XXX XXX", maxWidth);
+                .setText("XXX XXX XXX XXX XXX XXX")
+                .setFirstLineLeftOffset(firstLineOffset)
+                .setLineMaxWidth(maxWidth);
 
         // when
         float width = text.calculateTextWidth();

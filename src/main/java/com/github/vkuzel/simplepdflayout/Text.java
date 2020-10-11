@@ -10,7 +10,6 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,49 +19,19 @@ public class Text<T extends Text<T>> extends Box<T> {
         LEFT, CENTER, RIGHT
     }
 
-    protected List<String> lines;
+    protected String text;
     protected PDFont font = PDType1Font.HELVETICA;
     protected float fontSize = 11;
+    protected String linesSplitRegex = "\\r?\\n";
+    protected float firstLineLeftOffset = 0;
+    protected Float lineMaxWidth = null;
+    protected String lineWrapRegex = " ";
     protected float lineHeight = 11.65f;
-    protected Alignment alignment;
+    protected Alignment alignment = Alignment.LEFT;
     protected Color color = Color.BLACK;
 
     public T setText(String text) {
-        this.lines = Arrays.asList(text.split("\\r?\\n"));
-        return getThis();
-    }
-
-    /**
-     * Sets a text and splits it by space character to multiple lines if it is
-     * longer than maxWidth value.
-     *
-     * @param text Text to print.
-     * @param maxWidth Points.
-     * @return This instance.
-     */
-    public T setAndWrapText(String text, float maxWidth) {
-        float textWidth = calculateTextWidth(text);
-        if (textWidth < maxWidth) {
-            this.lines = Collections.singletonList(text);
-        } else {
-            String[] tokens = text.split(" ");
-            String buffer = "";
-            List<String> lines = new ArrayList<>();
-            for (String token : tokens) {
-                String potentialBuffer = buffer + (buffer.isEmpty() ? "" : " ") + token;
-                float bufferWidth = calculateTextWidth(potentialBuffer);
-                if (bufferWidth > maxWidth) {
-                    lines.add(buffer);
-                    buffer = token;
-                } else {
-                    buffer = potentialBuffer;
-                }
-            }
-            if (!buffer.isEmpty()) {
-                lines.add(buffer);
-            }
-            this.lines = lines;
-        }
+        this.text = text;
         return getThis();
     }
 
@@ -76,12 +45,35 @@ public class Text<T extends Text<T>> extends Box<T> {
         return getThis();
     }
 
+    public T setLineSplitRegex(String lineSplitRegex) {
+        this.linesSplitRegex = lineSplitRegex;
+        return getThis();
+    }
+
+    public T setFirstLineLeftOffset(float firstLineLeftOffset) {
+        this.firstLineLeftOffset = firstLineLeftOffset;
+        return getThis();
+    }
+
+    public T setLineMaxWidth(Float lineMaxWidth) {
+        this.lineMaxWidth = lineMaxWidth;
+        return getThis();
+    }
+
+    public T setLineWrapRegex(String lineWrapRegex) {
+        this.lineWrapRegex = lineWrapRegex;
+        return getThis();
+    }
+
     public T setLineHeight(float lineHeight) {
         this.lineHeight = lineHeight;
         return getThis();
     }
 
     public T setAlignment(Alignment alignment) {
+        if (alignment == null) {
+            throw new NullPointerException();
+        }
         this.alignment = alignment;
         return getThis();
     }
@@ -102,6 +94,7 @@ public class Text<T extends Text<T>> extends Box<T> {
     protected void drawText(PDPageContentStream contentStream) {
         Point contentTopLeft = calculateContentTopLeft();
         Dimension contentDimension = calculateContentDimension();
+        List<String> lines = getLines();
 
         try {
             for (int i = 0; i < lines.size(); i++) {
@@ -112,7 +105,9 @@ public class Text<T extends Text<T>> extends Box<T> {
 
                 float tx = contentTopLeft.getX();
                 float ty = contentTopLeft.getY() + (i + 1) * lineHeight;
-                if (alignment != Alignment.LEFT) {
+                if (alignment == Alignment.LEFT) {
+                    tx += i == 0 ? firstLineLeftOffset : 0;
+                } else {
                     float textWidth = calculateTextWidth(line);
                     if (alignment == Alignment.RIGHT) {
                         tx += contentDimension.getWidth() - textWidth;
@@ -136,6 +131,43 @@ public class Text<T extends Text<T>> extends Box<T> {
         }
     }
 
+    protected List<String> getLines() {
+        String[] potentialLines = text.split(linesSplitRegex);
+        List<String> lines = new ArrayList<>();
+        for (int i = 0; i < potentialLines.length; i++) {
+            String potentialLine = potentialLines[i];
+            List<String> wrappedLines = wrapLine(potentialLine, i == 0);
+            lines.addAll(wrappedLines);
+        }
+        return lines;
+    }
+
+    protected List<String> wrapLine(String text, boolean firstLine) {
+        if (lineMaxWidth == null || calculateTextWidth(text) < lineMaxWidth) {
+            return Collections.singletonList(text);
+        }
+
+        String[] tokens = text.split(lineWrapRegex);
+        String buffer = "";
+        List<String> lines = new ArrayList<>();
+        boolean firstWrapLine = firstLine;
+
+        for (String token : tokens) {
+            String potentialBuffer = buffer + (buffer.isEmpty() ? "" : " ") + token;
+            float bufferWidth = calculateTextWidth(potentialBuffer);
+            float leftOffset = firstWrapLine && alignment == Alignment.LEFT ? firstLineLeftOffset : 0;
+            if (bufferWidth + leftOffset > lineMaxWidth) {
+                lines.add(buffer);
+                buffer = token;
+                firstWrapLine = false;
+            } else {
+                buffer = potentialBuffer;
+            }
+        }
+
+        return lines;
+    }
+
     @Override
     protected Dimension calculateDimension() {
         Dimension dimension = super.calculateDimension();
@@ -150,6 +182,7 @@ public class Text<T extends Text<T>> extends Box<T> {
 
     public float calculateTextWidth() {
         float width = 0;
+        List<String> lines = getLines();
         for (String line : lines) {
             float lineWidth = calculateTextWidth(line);
             if (lineWidth > width) {
@@ -160,7 +193,7 @@ public class Text<T extends Text<T>> extends Box<T> {
     }
 
     public float calculateTextHeight() {
-        return lines.size() * lineHeight;
+        return getLines().size() * lineHeight;
     }
 
     protected float calculateTextWidth(String text) {
