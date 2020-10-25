@@ -20,7 +20,7 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
 
-public final class Image implements ChildElement<Image>, ElementWithMargin, ElementWithBorder, ElementWithPadding {
+public final class Image implements ChildElement<Image>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
     private final ParentElement<?> parentElement;
 
@@ -172,6 +172,11 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
         return this;
     }
 
+    @Override
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
     public Image setImageFile(File imageFile) {
         this.imageFile = imageFile;
         return this;
@@ -184,7 +189,7 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
 
     @Override
     public void render(PDDocument document, PDPageContentStream contentStream) {
-        backgroundRenderer.render(contentStream, backgroundColor);
+        backgroundRenderer.render(contentStream);
         renderImage(document, contentStream);
         borderRenderer.render(contentStream);
     }

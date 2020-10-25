@@ -20,7 +20,7 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
 
-public final class Text implements ChildElement<Text>, ElementWithMargin, ElementWithBorder, ElementWithPadding {
+public final class Text implements ChildElement<Text>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
     public enum Alignment {
         LEFT, CENTER, RIGHT
@@ -238,13 +238,18 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     @Override
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    @Override
     public ParentElement<?> getParent() {
         return parentElement;
     }
 
     @Override
     public void render(PDDocument document, PDPageContentStream contentStream) {
-        backgroundRenderer.render(contentStream, backgroundColor);
+        backgroundRenderer.render(contentStream);
         borderRenderer.render(contentStream);
         renderText(contentStream);
     }

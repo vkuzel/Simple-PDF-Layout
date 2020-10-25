@@ -1,6 +1,6 @@
 package com.github.vkuzel.simplepdflayout.renderer;
 
-import com.github.vkuzel.simplepdflayout.Element;
+import com.github.vkuzel.simplepdflayout.ElementWithBackground;
 import com.github.vkuzel.simplepdflayout.ElementWithPadding;
 import com.github.vkuzel.simplepdflayout.geometry.Point;
 import com.github.vkuzel.simplepdflayout.property.Padding;
@@ -14,13 +14,14 @@ import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
 
 public final class BackgroundRenderer {
 
-    private final Element element;
+    private final ElementWithBackground element;
 
-    public BackgroundRenderer(Element element) {
+    public BackgroundRenderer(ElementWithBackground element) {
         this.element = element;
     }
 
-    public void render(PDPageContentStream contentStream, Color backgroundColor) {
+    public void render(PDPageContentStream contentStream) {
+        Color backgroundColor = element.getBackgroundColor();
         if (backgroundColor == null) {
             return;
         }
