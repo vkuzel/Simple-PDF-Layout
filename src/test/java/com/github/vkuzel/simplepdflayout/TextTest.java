@@ -1,9 +1,10 @@
 package com.github.vkuzel.simplepdflayout;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TextTest {
 
@@ -23,6 +24,6 @@ public class TextTest {
         float width = text.calculateWidth(new HashSet<>());
 
         // then
-        Assert.assertTrue(width <= maxWidth);
+        assertTrue(width <= maxWidth);
     }
 }

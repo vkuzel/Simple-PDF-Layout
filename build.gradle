@@ -13,6 +13,6 @@ repositories {
 
 dependencies {
     compile("org.apache.pdfbox:pdfbox:2.0.21")
-    testCompile("junit:junit:4.12")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
 

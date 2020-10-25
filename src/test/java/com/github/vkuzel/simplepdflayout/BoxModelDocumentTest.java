@@ -5,8 +5,8 @@ import com.github.vkuzel.simplepdflayout.property.Border;
 import com.github.vkuzel.simplepdflayout.property.Line;
 import com.github.vkuzel.simplepdflayout.property.Margin;
 import com.github.vkuzel.simplepdflayout.property.Padding;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.awt.*;
 
@@ -18,7 +18,7 @@ public class BoxModelDocumentTest {
     private static final Line BORDER_TOP_BOTTOM = new Line().setWidth(25).setColor(Color.CYAN);
     private static final Line BORDER_LEFT_RIGHT = new Line().setWidth(50).setColor(Color.CYAN);
 
-    @Ignore
+    @Disabled
     @Test
     public void generateBoxModelDocumentTest() {
         Page page = Page.a4()
