@@ -13,19 +13,19 @@ class PagesTest {
     private static final float BOX_HEIGHT = 30;
 
     @Test
-    void addChildCreatesNewPageIfCurrentIsAlreadyFull() {
+    void addBoxCreatesNewPageIfCurrentIsAlreadyFull() {
         // given
         Pages pages = new Pages(PAGE_DIMENSION)
                 .setPadding(PAGE_PADDING);
 
         // when
         pages
-                .addChild(Box::new, box -> box
+                .addBox(box -> box
                         .setHeight(BOX_HEIGHT))
-                .addChild(Box::new, box -> box
+                .addBox(box -> box
                         .setHeight(BOX_HEIGHT)
                         .setVerticalPosition(TO_BOTTOM, box.getPrevious()))
-                .addChild(Box::new, box -> box
+                .addBox(box -> box
                         .setHeight(BOX_HEIGHT)
                         .setVerticalPosition(TO_BOTTOM, box.getPrevious()));
 

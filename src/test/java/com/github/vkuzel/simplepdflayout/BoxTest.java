@@ -21,7 +21,7 @@ public class BoxTest {
     public void init() {
         new Page(PAGE_DIMENSION)
                 .setPadding(PAGE_PADDING)
-                .addChild(Box::new, box -> this.box = box);
+                .addBox(box -> this.box = box);
     }
 
     @Test
