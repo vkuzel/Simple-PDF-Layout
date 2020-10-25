@@ -11,7 +11,9 @@ import java.util.function.Function;
  */
 public interface ParentElement<P extends ParentElement<P>> extends Element {
 
-    <C extends ChildElement<C>> P addChild(Function<P, C> childFactory, Consumer<C> childConfigurer);
+    <C extends ChildElement<C>> P addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer);
+
+    P removeChild(ChildElement<?> childElement);
 
     List<ChildElement<?>> getChildren();
 

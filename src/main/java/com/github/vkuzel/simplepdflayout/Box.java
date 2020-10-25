@@ -138,7 +138,11 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     public Box setVerticalPosition(YPosition yPosition, Element positionElement) {
-        yPositionCalculator = new RelativeToElementPositionCalculator(this, null, yPosition, positionElement);
+        if (positionElement != null) {
+            yPositionCalculator = new RelativeToElementPositionCalculator(this, null, yPosition, positionElement);
+        } else {
+            setX(0);
+        }
         return this;
     }
 
@@ -190,8 +194,13 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     @Override
-    public <C extends ChildElement<C>> Box addChild(Function<Box, C> childFactory, Consumer<C> childConfigurer) {
+    public <C extends ChildElement<C>> Box addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer) {
         return children.addChild(childFactory, childConfigurer);
+    }
+
+    @Override
+    public Box removeChild(ChildElement<?> childElement) {
+        return children.removeChild(childElement);
     }
 
     @Override

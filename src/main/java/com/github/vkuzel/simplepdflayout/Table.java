@@ -205,8 +205,13 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
     }
 
     @Override
-    public <C extends ChildElement<C>> Table addChild(Function<Table, C> childFactory, Consumer<C> childConfigurer) {
+    public <C extends ChildElement<C>> Table addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer) {
         return children.addChild(childFactory, childConfigurer);
+    }
+
+    @Override
+    public Table removeChild(ChildElement<?> childElement) {
+        return children.removeChild(childElement);
     }
 
     @Override

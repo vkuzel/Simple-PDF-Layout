@@ -18,11 +18,19 @@ public final class ChildElementCollection<P extends ParentElement<P>> {
         this.parentElement = parentElement;
     }
 
-    public <C extends ChildElement<C>> P addChild(Function<P, C> childFactory, Consumer<C> childConfigurer) {
+    public <C extends ChildElement<C>> P addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer) {
         C childElement = childFactory.apply(parentElement);
         children.add(childElement);
         childConfigurer.accept(childElement);
         return parentElement;
+    }
+
+    public P removeChild(ChildElement<?> childElement) {
+        if (children.remove(childElement)) {
+            return parentElement;
+        } else {
+            throw new IllegalStateException("Child " + childElement + " element was not found in " + parentElement);
+        }
     }
 
     public List<ChildElement<?>> getChildren() {

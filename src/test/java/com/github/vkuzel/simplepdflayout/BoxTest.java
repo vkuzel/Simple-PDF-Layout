@@ -2,6 +2,7 @@ package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.geometry.Dimension;
 import com.github.vkuzel.simplepdflayout.geometry.Point;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,19 +10,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BoxTest {
 
-    private static final Dimension PAGE_DIMENSION = new Dimension(100, 100);
+    private static final PDRectangle PAGE_DIMENSION = new PDRectangle(100, 100);
     private static final float PAGE_PADDING = 10;
-    private static final Dimension PAGE_CONTENT_DIMENSION = new Dimension(
-            PAGE_DIMENSION.getWidth() - 2 * PAGE_PADDING,
-            PAGE_DIMENSION.getHeight() - 2 * PAGE_PADDING
-    );
+    private static final float PAGE_CONTENT_WIDTH = PAGE_DIMENSION.getWidth() - 2 * PAGE_PADDING;
+    private static final float PAGE_CONTENT_HEIGHT = PAGE_DIMENSION.getHeight() - 2 * PAGE_PADDING;
 
-    private Page page;
     private Box box;
 
     @BeforeEach
     public void init() {
-        page = new Page(PAGE_DIMENSION)
+        new Page(PAGE_DIMENSION)
                 .setPadding(PAGE_PADDING)
                 .addChild(Box::new, box -> this.box = box);
     }
@@ -61,8 +59,8 @@ public class BoxTest {
         Dimension dimension = box.calculateDimension();
 
         // then
-        assertEquals(PAGE_CONTENT_DIMENSION.getWidth(), dimension.getWidth(), 0.001);
-        assertEquals(PAGE_CONTENT_DIMENSION.getHeight(), dimension.getHeight(), 0.001);
+        assertEquals(PAGE_CONTENT_WIDTH, dimension.getWidth(), 0.001);
+        assertEquals(PAGE_CONTENT_HEIGHT, dimension.getHeight(), 0.001);
     }
 
     @Test
@@ -74,7 +72,7 @@ public class BoxTest {
         Dimension dimension = box.calculateDimension();
 
         // then
-        assertEquals(PAGE_CONTENT_DIMENSION.getWidth() / 2, dimension.getWidth(), 0.001);
-        assertEquals(PAGE_CONTENT_DIMENSION.getHeight() / 2, dimension.getHeight(), 0.001);
+        assertEquals(PAGE_CONTENT_WIDTH / 2, dimension.getWidth(), 0.001);
+        assertEquals(PAGE_CONTENT_HEIGHT / 2, dimension.getHeight(), 0.001);
     }
 }

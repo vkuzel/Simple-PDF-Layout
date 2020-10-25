@@ -1,13 +1,13 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.*;
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
 import com.github.vkuzel.simplepdflayout.geometry.Point;
 import com.github.vkuzel.simplepdflayout.property.ChildElementCollection;
 import com.github.vkuzel.simplepdflayout.property.Padding;
 import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.awt.*;
 import java.util.List;
@@ -23,7 +23,7 @@ import static org.apache.pdfbox.pdmodel.common.PDRectangle.A4;
 
 public final class Page implements ParentElement<Page>, ElementWithPadding {
 
-    private final Dimension dimension;
+    private final PDRectangle dimension;
     private final ChildElementCollection<Page> children;
 
     private final DimensionCalculator widthDimensionCalculator;
@@ -38,7 +38,7 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
     private Padding padding = null;
     private boolean rainbow = false;
 
-    public Page(Dimension dimension) {
+    public Page(PDRectangle dimension) {
         this.dimension = dimension;
         this.children = new ChildElementCollection<>(this);
 
@@ -53,7 +53,11 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
     }
 
     public static Page a4() {
-        return new Page(new Dimension(A4));
+        return new Page(A4);
+    }
+
+    public PDRectangle getDimension() {
+        return dimension;
     }
 
     public Page setPadding(float padding) {
@@ -76,8 +80,13 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
     }
 
     @Override
-    public <C extends ChildElement<C>> Page addChild(Function<Page, C> childFactory, Consumer<C> childConfigurer) {
+    public <C extends ChildElement<C>> Page addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer) {
         return children.addChild(childFactory, childConfigurer);
+    }
+
+    @Override
+    public Page removeChild(ChildElement<?> childElement) {
+        return children.removeChild(childElement);
     }
 
     @Override

@@ -4,8 +4,6 @@ import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 public final class Dimension {
 
-    public static final Dimension EMPTY = new Dimension(0, 0);
-
     private final float width;
     private final float height;
 
