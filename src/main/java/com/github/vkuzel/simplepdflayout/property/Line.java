@@ -1,8 +1,8 @@
-package com.github.vkuzel.simplepdflayout;
+package com.github.vkuzel.simplepdflayout.property;
 
 import java.awt.*;
 
-public class Line {
+public final class Line {
 
     public enum Style {
         SOLID, DOTTED, DASHED, DASH_DOTTED

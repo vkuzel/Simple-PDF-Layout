@@ -1,6 +1,10 @@
 package com.github.vkuzel.simplepdflayout.geometry;
 
-public class Dimension {
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+
+public final class Dimension {
+
+    public static final Dimension EMPTY = new Dimension(0, 0);
 
     private final float width;
     private final float height;
@@ -8,6 +12,11 @@ public class Dimension {
     public Dimension(float width, float height) {
         this.width = width;
         this.height = height;
+    }
+
+    public Dimension(PDRectangle pdRectangle) {
+        this.width = pdRectangle.getWidth();
+        this.height = pdRectangle.getHeight();
     }
 
     public float getWidth() {

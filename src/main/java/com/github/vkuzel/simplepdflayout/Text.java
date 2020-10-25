@@ -1,99 +1,257 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
+import com.github.vkuzel.simplepdflayout.calculator.*;
 import com.github.vkuzel.simplepdflayout.geometry.Point;
+import com.github.vkuzel.simplepdflayout.property.Font;
+import com.github.vkuzel.simplepdflayout.property.*;
+import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.*;
 
-public class Text<T extends Text<T>> extends Box<T> {
+import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.HEIGHT;
+import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
+import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
+import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
+
+public final class Text implements ChildElement<Text>, ElementWithMargin, ElementWithBorder, ElementWithPadding {
 
     public enum Alignment {
         LEFT, CENTER, RIGHT
     }
 
-    protected String text;
-    protected PDFont font = PDType1Font.HELVETICA;
-    protected float fontSize = 11;
-    protected String linesSplitRegex = "\\r?\\n";
-    protected float firstLineLeftOffset = 0;
-    protected Float lineMaxWidth = null;
-    protected String lineWrapRegex = " ";
-    protected float lineHeight = 11.65f;
-    protected Alignment alignment = Alignment.LEFT;
-    protected Color color = Color.BLACK;
+    private final ParentElement<?> parentElement;
 
-    public T setText(String text) {
-        this.text = text;
-        return getThis();
+    private final ContentPositionCalculator xContentPositionCalculator;
+    private final ContentPositionCalculator yContentPositionCalculator;
+    private final ContentDimensionCalculator widthContentDimensionCalculator;
+    private final ContentDimensionCalculator heightContentDimensionCalculator;
+
+    private final BorderRenderer borderRenderer;
+    private final BackgroundRenderer backgroundRenderer;
+
+    private PositionCalculator xPositionCalculator;
+    private PositionCalculator yPositionCalculator;
+    private DimensionCalculator widthDimensionCalculator;
+    private DimensionCalculator heightDimensionCalculator;
+
+    private Margin margin = null;
+    private Border border = null;
+    private Padding padding = null;
+
+    private String text;
+    private Font font = Font.HELVETICA;
+    private float fontSize = 11;
+    private String linesSplitRegex = "\\r?\\n";
+    private float firstLineLeftOffset = 0;
+    private Float lineMaxWidth = null;
+    private String lineWrapRegex = " ";
+    private float lineHeight = 11.65f;
+    private Alignment alignment = Alignment.LEFT;
+    private Color color = Color.BLACK;
+    private Color backgroundColor;
+
+    public Text(ParentElement<?> parentElement) {
+        this.parentElement = parentElement;
+
+        this.xContentPositionCalculator = new ContentPositionCalculator(this, X);
+        this.yContentPositionCalculator = new ContentPositionCalculator(this, Y);
+        this.widthContentDimensionCalculator = new ContentDimensionCalculator(this, WIDTH);
+        this.heightContentDimensionCalculator = new ContentDimensionCalculator(this, HEIGHT);
+
+        this.backgroundRenderer = new BackgroundRenderer(this);
+        this.borderRenderer = new BorderRenderer(this);
+
+        setTopLeft(0, 0);
+        setWidthOfText();
+        setHeight(lineHeight);
     }
 
-    public T setFont(PDFont font) {
-        this.font = font;
-        return getThis();
+    public Text setTopLeft(float x, float y) {
+        return setX(x).setY(y);
     }
 
-    public T setFontSize(float fontSize) {
-        this.fontSize = fontSize;
-        return getThis();
+    public Text setTopLeftPercent(float xPercent, float yPercent) {
+        return setXPercent(xPercent).setYPercent(yPercent);
     }
 
-    public T setLineSplitRegex(String lineSplitRegex) {
-        this.linesSplitRegex = lineSplitRegex;
-        return getThis();
+    public Text setX(float x) {
+        xPositionCalculator = new FixedPositionCalculator(parentElement, X, x);
+        return this;
     }
 
-    public T setFirstLineLeftOffset(float firstLineLeftOffset) {
-        this.firstLineLeftOffset = firstLineLeftOffset;
-        return getThis();
+    public Text setXPercent(float xPercent) {
+        xPositionCalculator = new PercentOfParentPositionCalculator(parentElement, X, xPercent);
+        return this;
     }
 
-    public T setLineMaxWidth(Float lineMaxWidth) {
-        this.lineMaxWidth = lineMaxWidth;
-        return getThis();
+    public Text setY(float y) {
+        yPositionCalculator = new FixedPositionCalculator(parentElement, Y, y);
+        return this;
     }
 
-    public T setLineWrapRegex(String lineWrapRegex) {
-        this.lineWrapRegex = lineWrapRegex;
-        return getThis();
+    public Text setYPercent(float yPercent) {
+        yPositionCalculator = new PercentOfParentPositionCalculator(parentElement, Y, yPercent);
+        return this;
     }
 
-    public T setLineHeight(float lineHeight) {
-        this.lineHeight = lineHeight;
-        return getThis();
+    public Text setDimension(float width, float height) {
+        return setWidth(width).setHeight(height);
     }
 
-    public T setAlignment(Alignment alignment) {
-        if (alignment == null) {
-            throw new NullPointerException();
-        }
-        this.alignment = alignment;
-        return getThis();
+    public Text setDimensionPercent(float widthPercent, float heightPercent) {
+        return setWidthPercent(widthPercent).setHeightPercent(heightPercent);
     }
 
-    public T setColor(Color color) {
-        this.color = color;
-        return getThis();
+    public Text setWidth(float width) {
+        widthDimensionCalculator = new FixedDimensionCalculator(width);
+        return this;
+    }
+
+    public Text setWidthPercent(float widthPercent) {
+        widthDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, WIDTH, widthPercent);
+        return this;
+    }
+
+    public Text setWidthOfText() {
+        widthDimensionCalculator = new TextWidthDimensionCalculator();
+        return this;
+    }
+
+    public Text setHeight(float height) {
+        heightDimensionCalculator = new FixedDimensionCalculator(height);
+        return this;
+    }
+
+    public Text setHeightPercent(float heightPercent) {
+        heightDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, HEIGHT, heightPercent);
+        return this;
+    }
+
+    public Text setHorizontalPosition(XPosition xPosition, Element positionElement) {
+        xPositionCalculator = new RelativeToElementPositionCalculator(this, xPosition, null, positionElement);
+        return this;
+    }
+
+    public Text setVerticalPosition(YPosition yPosition, Element positionElement) {
+        yPositionCalculator = new RelativeToElementPositionCalculator(this, null, yPosition, positionElement);
+        return this;
+    }
+
+    public Text setMargin(float margin) {
+        return setMargin(new Margin(margin));
+    }
+
+    public Text setMargin(Margin margin) {
+        this.margin = margin;
+        return this;
     }
 
     @Override
-    public void draw(PDDocument document, PDPageContentStream contentStream) {
-        super.drawBackground(contentStream);
-        drawText(contentStream);
-        super.drawBorders(contentStream);
-        super.drawChildren(document, contentStream);
+    public Margin getMargin() {
+        return margin;
     }
 
-    protected void drawText(PDPageContentStream contentStream) {
+    public Text setBorder(Line line) {
+        return setBorder(new Border(line));
+    }
+
+    public Text setBorder(Border border) {
+        this.border = border;
+        return this;
+    }
+
+    @Override
+    public Border getBorder() {
+        return border;
+    }
+
+    public Text setPadding(float padding) {
+        return setPadding(new Padding(padding));
+    }
+
+    public Text setPadding(Padding padding) {
+        this.padding = padding;
+        return this;
+    }
+
+    @Override
+    public Padding getPadding() {
+        return padding;
+    }
+
+
+    public Text setText(String text) {
+        this.text = text;
+        return this;
+    }
+
+    public Text setFont(Font font) {
+        this.font = font;
+        return this;
+    }
+
+    public Text setFontSize(float fontSize) {
+        this.fontSize = fontSize;
+        return this;
+    }
+
+    public Text setLineSplitRegex(String linesSplitRegex) {
+        this.linesSplitRegex = linesSplitRegex;
+        return this;
+    }
+
+    public Text setFirstLineLeftOffset(float firstLineLeftOffset) {
+        this.firstLineLeftOffset = firstLineLeftOffset;
+        return this;
+    }
+
+    public Text setLineMaxWidth(float lineMaxWidth) {
+        this.lineMaxWidth = lineMaxWidth;
+        return this;
+    }
+
+    public Text setLineHeight(float lineHeight) {
+        this.lineHeight = lineHeight;
+        return this;
+    }
+
+    public Text setAlignment(Alignment alignment) {
+        this.alignment = alignment;
+        return this;
+    }
+
+    public Text setColor(Color color) {
+        this.color = color;
+        return this;
+    }
+
+    public Text setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
+        return this;
+    }
+
+    @Override
+    public ParentElement<?> getParent() {
+        return parentElement;
+    }
+
+    @Override
+    public void render(PDDocument document, PDPageContentStream contentStream) {
+        backgroundRenderer.render(contentStream, backgroundColor);
+        borderRenderer.render(contentStream);
+        renderText(contentStream);
+    }
+
+    private void renderText(PDPageContentStream contentStream) {
         Point contentTopLeft = calculateContentTopLeft();
-        Dimension contentDimension = calculateContentDimension();
+        float width = calculateWidth(new HashSet<>());
         List<String> lines = getLines();
 
         try {
@@ -110,17 +268,17 @@ public class Text<T extends Text<T>> extends Box<T> {
                 } else {
                     float textWidth = calculateTextWidth(line);
                     if (alignment == Alignment.RIGHT) {
-                        tx += contentDimension.getWidth() - textWidth;
+                        tx += width - textWidth;
                     } else if (alignment == Alignment.CENTER) {
-                        tx += (contentDimension.getWidth() - textWidth) / 2;
+                        tx += (width - textWidth) / 2;
                     }
                 }
 
                 Point textBottomLeft = new Point(tx, ty);
-                Point pdfTextBottomLeft = parent.convertPointToPdfCoordinates(textBottomLeft);
+                Point pdfTextBottomLeft = parentElement.convertPointToPdfCoordinates(textBottomLeft);
 
                 contentStream.beginText();
-                contentStream.setFont(font, fontSize);
+                contentStream.setFont(font.getPdType1Font(), fontSize);
                 contentStream.setNonStrokingColor(color);
                 contentStream.newLineAtOffset(pdfTextBottomLeft.getX(), pdfTextBottomLeft.getY());
                 contentStream.showText(line);
@@ -131,7 +289,7 @@ public class Text<T extends Text<T>> extends Box<T> {
         }
     }
 
-    protected List<String> getLines() {
+    private List<String> getLines() {
         String[] potentialLines = text.split(linesSplitRegex);
         List<String> lines = new ArrayList<>();
         for (int i = 0; i < potentialLines.length; i++) {
@@ -142,7 +300,7 @@ public class Text<T extends Text<T>> extends Box<T> {
         return lines;
     }
 
-    protected List<String> wrapLine(String text, boolean firstLine) {
+    private List<String> wrapLine(String text, boolean firstLine) {
         if (lineMaxWidth == null || calculateTextWidth(text) < lineMaxWidth) {
             return Collections.singletonList(text);
         }
@@ -171,39 +329,68 @@ public class Text<T extends Text<T>> extends Box<T> {
         return lines;
     }
 
-    @Override
-    protected Dimension calculateDimension() {
-        Dimension dimension = super.calculateDimension();
-        if (heightPercent == null && height == null) {
-            float verticalMargin = marginTop + marginBottom;
-            float verticalBorderWidth = borderTop.getWidth() + borderBottom.getWidth();
-            float verticalPadding = paddingTop + paddingBottom;
-            dimension = new Dimension(dimension.getWidth(), calculateTextHeight() + verticalMargin + verticalBorderWidth + verticalPadding);
-        }
-        return dimension;
-    }
-
-    public float calculateTextWidth() {
-        float width = 0;
-        List<String> lines = getLines();
-        for (String line : lines) {
-            float lineWidth = calculateTextWidth(line);
-            if (lineWidth > width) {
-                width = lineWidth;
-            }
-        }
-        return width;
-    }
-
-    public float calculateTextHeight() {
-        return getLines().size() * lineHeight;
-    }
-
-    protected float calculateTextWidth(String text) {
+    private float calculateTextWidth(String text) {
         try {
-            return font.getStringWidth(text) / 1000f * fontSize;
+            PDType1Font pdFont = font.getPdType1Font();
+            return pdFont.getStringWidth(text) / 1000f * fontSize;
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    @Override
+    public float calculateX(Set<Calculator> calculatorPath) {
+        return xPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateY(Set<Calculator> calculatorPath) {
+        return yPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentX(Set<Calculator> calculatorPath) {
+        return xContentPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentY(Set<Calculator> calculatorPath) {
+        return yContentPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateWidth(Set<Calculator> calculatorPath) {
+        return widthDimensionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateHeight(Set<Calculator> calculatorPath) {
+        return heightDimensionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentWidth(Set<Calculator> calculatorPath) {
+        return widthContentDimensionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentHeight(Set<Calculator> calculatorPath) {
+        return heightContentDimensionCalculator.calculate(calculatorPath);
+    }
+
+    private class TextWidthDimensionCalculator implements DimensionCalculator {
+
+        @Override
+        public float calculate(Set<Calculator> calculatorPath) {
+            validatePath(calculatorPath);
+            float width = 0;
+            for (String line : Text.this.getLines()) {
+                float lineWidth = Text.this.calculateTextWidth(line);
+                if (lineWidth > width) {
+                    width = lineWidth;
+                }
+            }
+            return width;
         }
     }
 }

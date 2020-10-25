@@ -1,22 +1,21 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
-
-import java.util.Collection;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public interface ParentElement<T extends ParentElement> extends Element {
+/**
+ * Element container can hold ChildElements.
+ *
+ * @see ChildElement
+ */
+public interface ParentElement<P extends ParentElement<P>> extends Element {
 
-    T addChild(ChildElement child);
+    <C extends ChildElement<C>> P addChild(Function<P, C> childFactory, Consumer<C> childConfigurer);
 
-    T addChildren(Collection<ChildElement> children);
+    List<ChildElement<?>> getChildren();
 
-    List<ChildElement> getChildren();
+    ChildElement<?> getPreviousChildTo(ChildElement<?> childElement);
 
-    Point calculateContentTopLeft();
-
-    Dimension calculateContentDimension();
-
-    Point convertPointToPdfCoordinates(Point point);
+    ChildElement<?> getNextChildTo(ChildElement<?> childElement);
 }

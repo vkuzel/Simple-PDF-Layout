@@ -1,75 +1,111 @@
 package com.github.vkuzel.simplepdflayout;
 
+import com.github.vkuzel.simplepdflayout.calculator.*;
 import com.github.vkuzel.simplepdflayout.geometry.Dimension;
 import com.github.vkuzel.simplepdflayout.geometry.Point;
+import com.github.vkuzel.simplepdflayout.property.ChildElementCollection;
+import com.github.vkuzel.simplepdflayout.property.Padding;
+import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class Page<T extends Page<T>> implements ParentElement<T> {
+import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.HEIGHT;
+import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
+import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
+import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
+import static org.apache.pdfbox.pdmodel.common.PDRectangle.A4;
 
-    protected PDRectangle page = PDRectangle.A4;
-    protected final List<ChildElement> children = new ArrayList<>();
-    protected boolean rainbow = false;
+public final class Page implements ParentElement<Page>, ElementWithPadding {
 
-    @SuppressWarnings("unchecked")
-    protected T getThis() {
-        return (T) this;
+    private final Dimension dimension;
+    private final ChildElementCollection<Page> children;
+
+    private final DimensionCalculator widthDimensionCalculator;
+    private final DimensionCalculator heightDimensionCalculator;
+    private final ContentPositionCalculator xContentPositionCalculator;
+    private final ContentPositionCalculator yContentPositionCalculator;
+    private final ContentDimensionCalculator widthContentDimensionCalculator;
+    private final ContentDimensionCalculator heightContentDimensionCalculator;
+
+    private final ChildrenRenderer childrenRenderer;
+
+    private Padding padding = null;
+    private boolean rainbow = false;
+
+    public Page(Dimension dimension) {
+        this.dimension = dimension;
+        this.children = new ChildElementCollection<>(this);
+
+        this.widthDimensionCalculator = new FixedDimensionCalculator(dimension.getWidth());
+        this.heightDimensionCalculator = new FixedDimensionCalculator(dimension.getHeight());
+        this.xContentPositionCalculator = new ContentPositionCalculator(this, X);
+        this.yContentPositionCalculator = new ContentPositionCalculator(this, Y);
+        this.widthContentDimensionCalculator = new ContentDimensionCalculator(this, WIDTH);
+        this.heightContentDimensionCalculator = new ContentDimensionCalculator(this, HEIGHT);
+
+        this.childrenRenderer = new ChildrenRenderer(this);
     }
 
-    public T setPage(PDRectangle page) {
-        this.page = page;
-        return getThis();
+    public static Page a4() {
+        return new Page(new Dimension(A4));
     }
 
-    public T rainbow() {
+    public Page setPadding(float padding) {
+        return setPadding(new Padding(padding));
+    }
+
+    public Page setPadding(Padding padding) {
+        this.padding = padding;
+        return this;
+    }
+
+    @Override
+    public Padding getPadding() {
+        return padding;
+    }
+
+    public Page rainbow() {
         this.rainbow = true;
-        return getThis();
+        return this;
     }
 
     @Override
-    public T addChild(ChildElement child) {
-        return addChildren(Collections.singleton(child));
+    public <C extends ChildElement<C>> Page addChild(Function<Page, C> childFactory, Consumer<C> childConfigurer) {
+        return children.addChild(childFactory, childConfigurer);
     }
 
     @Override
-    public T addChildren(Collection<ChildElement> children) {
-        for (ChildElement child : children) {
-            if (child.getParent() != null) {
-                throw new IllegalArgumentException("Child " + child.getClass().getSimpleName() + " already has a parent, cannot be put into another!");
-            }
-            child.setParent(this);
-            this.children.add(child);
-        }
-        return getThis();
+    public List<ChildElement<?>> getChildren() {
+        return children.getChildren();
     }
 
     @Override
-    public List<ChildElement> getChildren() {
-        return children;
+    public ChildElement<?> getPreviousChildTo(ChildElement<?> childElement) {
+        return children.getPreviousChildTo(childElement);
     }
 
     @Override
-    public void draw(PDDocument document, PDPageContentStream contentStream) {
+    public ChildElement<?> getNextChildTo(ChildElement<?> childElement) {
+        return children.getNextChildTo(childElement);
+    }
+
+    @Override
+    public void render(PDDocument document, PDPageContentStream contentStream) {
         if (rainbow) {
-            setRainbowToChildrenRecursively(1, children);
+            setRainbowToChildrenRecursively(1, children.getChildren());
         }
-
-        for (ChildElement child : children) {
-            child.draw(document, contentStream);
-        }
+        childrenRenderer.render(document, contentStream);
     }
 
-    @SuppressWarnings("unchecked")
-    protected void setRainbowToChildrenRecursively(int level, List<ChildElement> children) {
+    private void setRainbowToChildrenRecursively(int level, List<ChildElement<?>> children) {
         for (int i = 0; i < children.size(); i++) {
-            ChildElement child = children.get(i);
+            ChildElement<?> child = children.get(i);
             if (child instanceof Box) {
                 Box box = (Box) child;
                 float mod = i % 6;
@@ -79,29 +115,54 @@ public class Page<T extends Page<T>> implements ParentElement<T> {
                 box.setBackgroundColor(new Color(r, g, b));
             }
             if (child instanceof ParentElement) {
-                ParentElement parent = (ParentElement) child;
+                ParentElement<?> parent = (ParentElement<?>) child;
                 setRainbowToChildrenRecursively(level + 1, parent.getChildren());
             }
         }
     }
 
     @Override
-    public Point calculateContentTopLeft() {
-        return new Point(0, 0);
+    public float calculateX(Set<Calculator> calculatorPath) {
+        return 0;
     }
 
     @Override
-    public Dimension calculateContentDimension() {
-        return new Dimension(page.getWidth(), page.getHeight());
+    public float calculateY(Set<Calculator> calculatorPath) {
+        return 0;
+    }
+
+    @Override
+    public float calculateWidth(Set<Calculator> calculatorPath) {
+        return widthDimensionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateHeight(Set<Calculator> calculatorPath) {
+        return heightDimensionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentX(Set<Calculator> calculatorPath) {
+        return xContentPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentY(Set<Calculator> calculatorPath) {
+        return yContentPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentWidth(Set<Calculator> calculatorPath) {
+        return widthContentDimensionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentHeight(Set<Calculator> calculatorPath) {
+        return heightContentDimensionCalculator.calculate(calculatorPath);
     }
 
     @Override
     public Point convertPointToPdfCoordinates(Point point) {
-        return new Point(point.getX(), page.getHeight() - point.getY());
-    }
-
-    @Override
-    public String toStringCoordinates() {
-        return "[width, height] = " + calculateContentDimension();
+        return new Point(point.getX(), dimension.getHeight() - point.getY());
     }
 }

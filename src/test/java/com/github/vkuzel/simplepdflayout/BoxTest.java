@@ -6,56 +6,74 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class BoxTest {
 
-    private Page root;
-    private Box parent;
+    private static final Dimension PAGE_DIMENSION = new Dimension(100, 100);
+    private static final float PAGE_PADDING = 10;
+    private static final Dimension PAGE_CONTENT_DIMENSION = new Dimension(
+            PAGE_DIMENSION.getWidth() - 2 * PAGE_PADDING,
+            PAGE_DIMENSION.getHeight() - 2 * PAGE_PADDING
+    );
+
+    private Page page;
     private Box box;
 
     @Before
     public void init() {
-        box = new Box();
-        parent = new Box()
-                .setPadding(10)
-                .addChild(box);
-        root = new Page()
-                .addChild(parent);
+        page = new Page(PAGE_DIMENSION)
+                .setPadding(PAGE_PADDING)
+                .addChild(Box::new, box -> this.box = box);
     }
 
     @Test
-    public void calculateTopLeft_absolute() {
+    public void absoluteBoxPositionIsCorrectlyCalculated() {
+        // given
         box.setTopLeft(10, 10);
+
+        // when
         Point topLeft = box.calculateTopLeft();
+
+        // then
         Assert.assertEquals(20, topLeft.getX(), 0.001);
         Assert.assertEquals(20, topLeft.getY(), 0.001);
     }
 
     @Test
-    public void calculateTopLeft_percent() {
+    public void fiftyPercentBoxPositionIsInTheMiddleOfPage() {
+        // given
         box.setTopLeftPercent(50, 50);
+
+        // when
         Point topLeft = box.calculateTopLeft();
-        float horizontalMiddleOfPage = root.page.getWidth() / 2;
-        float verticalMiddleOfPage = root.page.getHeight() / 2;
-        Assert.assertEquals(horizontalMiddleOfPage, topLeft.getX(), 0.001);
-        Assert.assertEquals(verticalMiddleOfPage, topLeft.getY(), 0.001);
+
+        // then
+        Assert.assertEquals(PAGE_DIMENSION.getWidth() / 2, topLeft.getX(), 0.001);
+        Assert.assertEquals(PAGE_DIMENSION.getHeight() / 2, topLeft.getY(), 0.001);
     }
 
     @Test
-    public void calculateDimension_default() {
-        Dimension parentContentDimension = parent.calculateContentDimension();
+    public void hundredPercentBoxDimensionEqualsToPageContentDimension() {
+        // given
+        box.setDimensionPercent(100, 100);
+
+        // when
         Dimension dimension = box.calculateDimension();
-        Assert.assertEquals(parentContentDimension.getWidth(), dimension.getWidth(), 0.001);
-        Assert.assertEquals(parentContentDimension.getHeight(), dimension.getHeight(), 0.001);
+
+        // then
+        Assert.assertEquals(PAGE_CONTENT_DIMENSION.getWidth(), dimension.getWidth(), 0.001);
+        Assert.assertEquals(PAGE_CONTENT_DIMENSION.getHeight(), dimension.getHeight(), 0.001);
     }
 
     @Test
-    public void calculateDimension_percent() {
+    public void fiftyPercentBoxDimensionIsHalfOfThePageContentSize() {
+        // given
         box.setDimensionPercent(50, 50);
-        Dimension parentContentDimension = parent.calculateContentDimension();
+
+        // when
         Dimension dimension = box.calculateDimension();
-        Assert.assertEquals(parentContentDimension.getWidth() / 2, dimension.getWidth(), 0.001);
-        Assert.assertEquals(parentContentDimension.getHeight() / 2, dimension.getHeight(), 0.001);
+
+        // then
+        Assert.assertEquals(PAGE_CONTENT_DIMENSION.getWidth() / 2, dimension.getWidth(), 0.001);
+        Assert.assertEquals(PAGE_CONTENT_DIMENSION.getHeight() / 2, dimension.getHeight(), 0.001);
     }
 }
