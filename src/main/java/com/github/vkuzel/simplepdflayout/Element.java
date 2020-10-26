@@ -1,8 +1,8 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.Calculator;
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
+import com.github.vkuzel.simplepdflayout.property.Dimension;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
@@ -18,7 +18,7 @@ public interface Element {
     default Point calculateTopLeft() {
         float x = calculateX(new HashSet<>());
         float y = calculateY(new HashSet<>());
-        return new Point(x, y);
+        return Point.of(x, y);
     }
 
     float calculateWidth(Set<Calculator> calculatorPath);
@@ -28,7 +28,7 @@ public interface Element {
     default Dimension calculateDimension() {
         float width = calculateWidth(new HashSet<>());
         float height = calculateHeight(new HashSet<>());
-        return new Dimension(width, height);
+        return Dimension.of(width, height);
     }
 
     float calculateContentX(Set<Calculator> calculatorPath);
@@ -38,7 +38,7 @@ public interface Element {
     default Point calculateContentTopLeft() {
         float x = calculateContentX(new HashSet<>());
         float y = calculateContentY(new HashSet<>());
-        return new Point(x, y);
+        return Point.of(x, y);
     }
 
     float calculateContentWidth(Set<Calculator> calculatorPath);
@@ -48,7 +48,7 @@ public interface Element {
     default Dimension calculateContentDimension() {
         float width = calculateContentWidth(new HashSet<>());
         float height = calculateContentHeight(new HashSet<>());
-        return new Dimension(width, height);
+        return Dimension.of(width, height);
     }
 
     void render(PDDocument document, PDPageContentStream contentStream);

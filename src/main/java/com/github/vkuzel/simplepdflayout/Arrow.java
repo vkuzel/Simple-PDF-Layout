@@ -1,16 +1,18 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.Calculator;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
-import com.github.vkuzel.simplepdflayout.geometry.Vector;
 import com.github.vkuzel.simplepdflayout.property.Line;
+import com.github.vkuzel.simplepdflayout.property.Point;
+import com.github.vkuzel.simplepdflayout.property.Vector;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-import java.awt.*;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
+import static java.awt.Color.RED;
 
 public final class Arrow implements ChildElement<Arrow> {
 
@@ -23,9 +25,9 @@ public final class Arrow implements ChildElement<Arrow> {
     private Element startElement;
     private boolean startArrow = true;
     private boolean endArrow = false;
-    private Line line = new Line().setWidth(3).setColor(Color.RED);
+    private Line line = Line.of(3, SOLID, RED);
 
-    public Arrow(ParentElement<?> parentElement) {
+    Arrow(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
     }
 
@@ -77,15 +79,15 @@ public final class Arrow implements ChildElement<Arrow> {
     @Override
     public void render(PDDocument document, PDPageContentStream contentStream) {
         try {
-            Point start = new Point(calculateStartX(new HashSet<>()), calculateStartY(new HashSet<>()));
-            Point end = new Point(calculateEndX(new HashSet<>()), calculateEndY(new HashSet<>()));
+            Point start = Point.of(calculateStartX(new HashSet<>()), calculateStartY(new HashSet<>()));
+            Point end = Point.of(calculateEndX(new HashSet<>()), calculateEndY(new HashSet<>()));
             Point pdfStart = parentElement.convertPointToPdfCoordinates(start);
             Point pdfEnd = parentElement.convertPointToPdfCoordinates(end);
             float arrowSize = line.getWidth() * 5.5f;
 
             if (startArrow) {
                 Vector v = Vector.ofLineSegment(pdfStart, pdfEnd).normalize();
-                Point p = new Point(pdfStart.getX() + v.getX() * arrowSize, pdfStart.getY() + v.getY() * arrowSize);
+                Point p = Point.of(pdfStart.getX() + v.getX() * arrowSize, pdfStart.getY() + v.getY() * arrowSize);
 
                 contentStream.setNonStrokingColor(line.getColor());
                 contentStream.moveTo(pdfStart.getX(), pdfStart.getY());
@@ -99,7 +101,7 @@ public final class Arrow implements ChildElement<Arrow> {
 
             if (endArrow) {
                 Vector v = Vector.ofLineSegment(pdfEnd, pdfStart).normalize();
-                Point p = new Point(pdfEnd.getX() + v.getX() * arrowSize, pdfEnd.getY() + v.getY() * arrowSize);
+                Point p = Point.of(pdfEnd.getX() + v.getX() * arrowSize, pdfEnd.getY() + v.getY() * arrowSize);
 
                 contentStream.setNonStrokingColor(line.getColor());
                 contentStream.moveTo(pdfEnd.getX(), pdfEnd.getY());

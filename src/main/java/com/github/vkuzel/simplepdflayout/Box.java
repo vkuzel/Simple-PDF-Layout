@@ -5,6 +5,7 @@ import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
+import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
@@ -44,7 +45,7 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
 
     private Color backgroundColor;
 
-    public Box(ParentElement<?> parentElement) {
+    Box(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
         this.children = new ChildElementCollection<>(this);
 
@@ -147,7 +148,7 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     public Box setMargin(float margin) {
-        return setMargin(new Margin(margin));
+        return setMargin(Margin.of(margin));
     }
 
     public Box setMargin(Margin margin) {
@@ -161,7 +162,7 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     public Box setBorder(Line line) {
-        return setBorder(new Border(line));
+        return setBorder(Border.of(line));
     }
 
     public Box setBorder(Border border) {
@@ -175,7 +176,7 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     public Box setPadding(float padding) {
-        return setPadding(new Padding(padding));
+        return setPadding(Padding.of(padding));
     }
 
     public Box setPadding(Padding padding) {

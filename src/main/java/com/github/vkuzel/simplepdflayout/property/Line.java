@@ -2,32 +2,47 @@ package com.github.vkuzel.simplepdflayout.property;
 
 import java.awt.*;
 
+import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
+import static java.awt.Color.BLACK;
+
 public final class Line {
 
     public enum Style {
         SOLID, DOTTED, DASHED, DASH_DOTTED
     }
 
-    private float width = 0;
-    private Style style = Style.SOLID;
-    private Color color = Color.BLACK;
+    private final float width;
+    private final Style style;
+    private final Color color;
+
+    private Line(float width, Style style, Color color) {
+        this.width = width;
+        this.style = style;
+        this.color = color;
+    }
+
+    public static Line of() {
+        return of(0, SOLID, BLACK);
+    }
+
+    public static Line of(float width, Style style, Color color) {
+        return new Line(width, style, color);
+    }
 
     public float getWidth() {
         return width;
     }
 
-    public Line setWidth(float width) {
-        this.width = width;
-        return this;
+    public Line withWidth(float width) {
+        return new Line(width, style, color);
     }
 
     public Style getStyle() {
         return style;
     }
 
-    public Line setStyle(Style style) {
-        this.style = style;
-        return this;
+    public Line withStyle(Style style) {
+        return new Line(width, style, color);
     }
 
     public float[] calculatePattern() {
@@ -49,8 +64,7 @@ public final class Line {
         return color;
     }
 
-    public Line setColor(Color color) {
-        this.color = color;
-        return this;
+    public Line withColor(Color color) {
+        return new Line(width, style, color);
     }
 }

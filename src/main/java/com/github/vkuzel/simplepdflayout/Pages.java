@@ -1,30 +1,32 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.Calculator;
+import com.github.vkuzel.simplepdflayout.property.Dimension;
 import com.github.vkuzel.simplepdflayout.property.Padding;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.apache.pdfbox.pdmodel.common.PDRectangle.A4;
-
 public final class Pages implements ParentElement<Pages>, ElementWithPadding {
 
-    private final PDRectangle dimension;
+    private final Dimension dimension;
     private final List<Page> pages = new ArrayList<>();
 
     private Padding padding = null;
 
-    public Pages(PDRectangle dimension) {
+    private Pages(Dimension dimension) {
         this.dimension = dimension;
     }
 
+    public static Pages of(Dimension dimension) {
+        return new Pages(dimension);
+    }
+
     public static Pages a4() {
-        return new Pages(A4);
+        return of(Dimension.a4());
     }
 
     @Override
@@ -33,7 +35,7 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     }
 
     public Pages setPadding(float padding) {
-        return setPadding(new Padding(padding));
+        return setPadding(Padding.of(padding));
     }
 
     public Pages setPadding(Padding padding) {
@@ -75,7 +77,7 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     }
 
     private Page createPage() {
-        Page page = new Page(dimension)
+        Page page = Page.of(dimension)
                 .setPadding(padding);
         pages.add(page);
         return page;

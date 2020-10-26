@@ -1,13 +1,13 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.*;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
-import com.github.vkuzel.simplepdflayout.property.ChildElementCollection;
+import com.github.vkuzel.simplepdflayout.property.Dimension;
 import com.github.vkuzel.simplepdflayout.property.Padding;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
+import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
 
 import java.awt.*;
 import java.util.List;
@@ -19,11 +19,10 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
-import static org.apache.pdfbox.pdmodel.common.PDRectangle.A4;
 
 public final class Page implements ParentElement<Page>, ElementWithPadding {
 
-    private final PDRectangle dimension;
+    private final Dimension dimension;
     private final ChildElementCollection<Page> children;
 
     private final DimensionCalculator widthDimensionCalculator;
@@ -38,7 +37,7 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
     private Padding padding = null;
     private boolean rainbow = false;
 
-    public Page(PDRectangle dimension) {
+    private Page(Dimension dimension) {
         this.dimension = dimension;
         this.children = new ChildElementCollection<>(this);
 
@@ -52,16 +51,20 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
         this.childrenRenderer = new ChildrenRenderer(this);
     }
 
-    public static Page a4() {
-        return new Page(A4);
+    public static Page of(Dimension dimension) {
+        return new Page(dimension);
     }
 
-    public PDRectangle getDimension() {
+    public static Page a4() {
+        return of(Dimension.a4());
+    }
+
+    public Dimension getDimension() {
         return dimension;
     }
 
     public Page setPadding(float padding) {
-        return setPadding(new Padding(padding));
+        return setPadding(Padding.of(padding));
     }
 
     public Page setPadding(Padding padding) {
@@ -172,6 +175,6 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
 
     @Override
     public Point convertPointToPdfCoordinates(Point point) {
-        return new Point(point.getX(), dimension.getHeight() - point.getY());
+        return Point.of(point.getX(), dimension.getHeight() - point.getY());
     }
 }

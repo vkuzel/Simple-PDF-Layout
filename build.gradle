@@ -1,5 +1,7 @@
 plugins {
-    id 'java'
+    //id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
 java {
@@ -16,3 +18,14 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.vkuzel'
+            artifactId = 'simple-pdf-layout'
+            version = '2.0.0'
+
+            from components.java
+        }
+    }
+}

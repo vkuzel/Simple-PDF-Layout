@@ -1,4 +1,4 @@
-package com.github.vkuzel.simplepdflayout.property;
+package com.github.vkuzel.simplepdflayout.util;
 
 import com.github.vkuzel.simplepdflayout.ChildElement;
 import com.github.vkuzel.simplepdflayout.ParentElement;

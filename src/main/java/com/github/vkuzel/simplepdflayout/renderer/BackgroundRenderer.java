@@ -2,8 +2,8 @@ package com.github.vkuzel.simplepdflayout.renderer;
 
 import com.github.vkuzel.simplepdflayout.ElementWithBackground;
 import com.github.vkuzel.simplepdflayout.ElementWithPadding;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
 import com.github.vkuzel.simplepdflayout.property.Padding;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.awt.*;
@@ -31,7 +31,7 @@ public final class BackgroundRenderer {
         float width = calculateWidth();
         float height = calculateHeight();
 
-        Point bottomLeft = new Point(x, y + height);
+        Point bottomLeft = Point.of(x, y + height);
         Point pdfBottomLeft = element.convertPointToPdfCoordinates(bottomLeft);
 
         try {

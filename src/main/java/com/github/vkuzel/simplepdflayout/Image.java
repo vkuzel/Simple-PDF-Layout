@@ -1,8 +1,8 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.*;
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
+import com.github.vkuzel.simplepdflayout.property.Dimension;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
@@ -44,7 +44,7 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
     private Color backgroundColor;
     private File imageFile;
 
-    public Image(ParentElement<?> parentElement) {
+    Image(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
 
         this.xContentPositionCalculator = new ContentPositionCalculator(this, X);
@@ -126,7 +126,7 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
     }
 
     public Image setMargin(float margin) {
-        return setMargin(new Margin(margin));
+        return setMargin(Margin.of(margin));
     }
 
     public Image setMargin(Margin margin) {
@@ -140,7 +140,7 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
     }
 
     public Image setBorder(Line line) {
-        return setBorder(new Border(line));
+        return setBorder(Border.of(line));
     }
 
     public Image setBorder(Border border) {
@@ -154,7 +154,7 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
     }
 
     public Image setPadding(float padding) {
-        return setPadding(new Padding(padding));
+        return setPadding(Padding.of(padding));
     }
 
     public Image setPadding(Padding padding) {
@@ -201,7 +201,7 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
 
         Point topLeft = calculateContentTopLeft();
         Dimension dimension = calculateContentDimension();
-        Point bottomLeft = new Point(topLeft.getX(), topLeft.getY() + dimension.getHeight());
+        Point bottomLeft = Point.of(topLeft.getX(), topLeft.getY() + dimension.getHeight());
         Point pdfBottomLeft = convertPointToPdfCoordinates(bottomLeft);
 
         try {

@@ -1,8 +1,7 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import com.github.vkuzel.simplepdflayout.property.Dimension;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BoxTest {
 
-    private static final PDRectangle PAGE_DIMENSION = new PDRectangle(100, 100);
+    private static final Dimension PAGE_DIMENSION = Dimension.of(100, 100);
     private static final float PAGE_PADDING = 10;
     private static final float PAGE_CONTENT_WIDTH = PAGE_DIMENSION.getWidth() - 2 * PAGE_PADDING;
     private static final float PAGE_CONTENT_HEIGHT = PAGE_DIMENSION.getHeight() - 2 * PAGE_PADDING;
@@ -19,7 +18,7 @@ public class BoxTest {
 
     @BeforeEach
     public void init() {
-        new Page(PAGE_DIMENSION)
+        Page.of(PAGE_DIMENSION)
                 .setPadding(PAGE_PADDING)
                 .addBox(box -> this.box = box);
     }

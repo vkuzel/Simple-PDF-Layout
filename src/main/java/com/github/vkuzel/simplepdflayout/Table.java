@@ -1,12 +1,11 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.*;
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
 import com.github.vkuzel.simplepdflayout.property.*;
+import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +17,8 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
+import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
+import static java.awt.Color.GRAY;
 
 public final class Table implements ParentElement<Table>, ChildElement<Table> {
 
@@ -32,7 +33,7 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
     private TableCellConfigurer cellConfigurer;
     private List<List<String>> data;
 
-    public Table(ParentElement<?> parentElement) {
+    Table(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
         this.children = new ChildElementCollection<>(this);
 
@@ -187,16 +188,16 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
     }
 
     private void configureCell(Table table, Text cell, int noOfRows, int noOfColumns, int row, int column) {
-        Line line = new Line().setWidth(1).setColor(Color.GRAY);
-        Line top = new Line();
-        Line left = new Line();
+        Line line = Line.of(1, SOLID, GRAY);
+        Line top = Line.of();
+        Line left = Line.of();
         if (row == 1) {
             top = line;
         }
         if (column == 1) {
             left = line;
         }
-        cell.setBorder(new Border(top, line, line, left));
+        cell.setBorder(Border.of(top, line, line, left));
     }
 
     @Override

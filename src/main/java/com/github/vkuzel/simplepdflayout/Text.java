@@ -1,8 +1,8 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.*;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
 import com.github.vkuzel.simplepdflayout.property.Font;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
@@ -57,7 +57,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     private Color color = Color.BLACK;
     private Color backgroundColor;
 
-    public Text(ParentElement<?> parentElement) {
+    Text(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
 
         this.xContentPositionCalculator = new ContentPositionCalculator(this, X);
@@ -145,7 +145,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     public Text setMargin(float margin) {
-        return setMargin(new Margin(margin));
+        return setMargin(Margin.of(margin));
     }
 
     public Text setMargin(Margin margin) {
@@ -159,7 +159,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     public Text setBorder(Line line) {
-        return setBorder(new Border(line));
+        return setBorder(Border.of(line));
     }
 
     public Text setBorder(Border border) {
@@ -173,7 +173,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     public Text setPadding(float padding) {
-        return setPadding(new Padding(padding));
+        return setPadding(Padding.of(padding));
     }
 
     public Text setPadding(Padding padding) {
@@ -279,7 +279,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
                     }
                 }
 
-                Point textBottomLeft = new Point(tx, ty);
+                Point textBottomLeft = Point.of(tx, ty);
                 Point pdfTextBottomLeft = parentElement.convertPointToPdfCoordinates(textBottomLeft);
 
                 contentStream.beginText();

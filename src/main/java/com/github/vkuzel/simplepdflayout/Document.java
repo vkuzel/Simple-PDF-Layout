@@ -1,5 +1,6 @@
 package com.github.vkuzel.simplepdflayout;
 
+import com.github.vkuzel.simplepdflayout.property.Dimension;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -54,7 +55,8 @@ public final class Document {
     }
 
     private static void renderPage(PDDocument pdDocument, Page page) throws IOException {
-        PDPage pdPage = new PDPage(page.getDimension());
+        Dimension dimension = page.getDimension();
+        PDPage pdPage = new PDPage(dimension.toPdRectangle());
         pdDocument.addPage(pdPage);
         try (PDPageContentStream contentStream = new PDPageContentStream(pdDocument, pdPage)) {
             page.render(pdDocument, contentStream);

@@ -1,13 +1,17 @@
-package com.github.vkuzel.simplepdflayout.geometry;
+package com.github.vkuzel.simplepdflayout.property;
 
 public final class Point {
 
     private final float x;
     private final float y;
 
-    public Point(float x, float y) {
+    private Point(float x, float y) {
         this.x = x;
         this.y = y;
+    }
+
+    public static Point of(float x, float y) {
+        return new Point(x, y);
     }
 
     public float distance(Point point) {

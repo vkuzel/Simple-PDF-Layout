@@ -2,10 +2,10 @@ package com.github.vkuzel.simplepdflayout.renderer;
 
 import com.github.vkuzel.simplepdflayout.ElementWithBorder;
 import com.github.vkuzel.simplepdflayout.ElementWithMargin;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
 import com.github.vkuzel.simplepdflayout.property.Border;
 import com.github.vkuzel.simplepdflayout.property.Line;
 import com.github.vkuzel.simplepdflayout.property.Margin;
+import com.github.vkuzel.simplepdflayout.property.Point;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
@@ -23,10 +23,10 @@ public final class BorderRenderer {
     }
 
     public void render(PDPageContentStream contentStream) {
-        Point topLeft = new Point(calculateTopLeftX(), calculateTopLeftY());
-        Point bottomRight = new Point(calculateBottomRightX(), calculateBottomRightY());
-        Point topRight = new Point(bottomRight.getX(), topLeft.getY());
-        Point bottomLeft = new Point(topLeft.getX(), bottomRight.getY());
+        Point topLeft = Point.of(calculateTopLeftX(), calculateTopLeftY());
+        Point bottomRight = Point.of(calculateBottomRightX(), calculateBottomRightY());
+        Point topRight = Point.of(bottomRight.getX(), topLeft.getY());
+        Point bottomLeft = Point.of(topLeft.getX(), bottomRight.getY());
 
         Line borderTop = getLine(Border::getTop);
         Line borderRight = getLine(Border::getRight);
@@ -34,23 +34,23 @@ public final class BorderRenderer {
         Line borderLeft = getLine(Border::getLeft);
 
         if (borderTop != null && borderTop.getWidth() > 0) {
-            Point topStart = new Point(topLeft.getX() - getWidth(Border::getLeft) / 2, topLeft.getY());
-            Point topEnd = new Point(topRight.getX() + getWidth(Border::getRight) / 2, topRight.getY());
+            Point topStart = Point.of(topLeft.getX() - getWidth(Border::getLeft) / 2, topLeft.getY());
+            Point topEnd = Point.of(topRight.getX() + getWidth(Border::getRight) / 2, topRight.getY());
             renderLine(borderTop, topStart, topEnd, contentStream);
         }
         if (borderRight != null && borderRight.getWidth() > 0) {
-            Point rightStart = new Point(topRight.getX(), topRight.getY() - getWidth(Border::getTop) / 2);
-            Point rightEnd = new Point(bottomRight.getX(), bottomRight.getY() + getWidth(Border::getBottom) / 2);
+            Point rightStart = Point.of(topRight.getX(), topRight.getY() - getWidth(Border::getTop) / 2);
+            Point rightEnd = Point.of(bottomRight.getX(), bottomRight.getY() + getWidth(Border::getBottom) / 2);
             renderLine(borderRight, rightStart, rightEnd, contentStream);
         }
         if (borderBottom != null && borderBottom.getWidth() > 0) {
-            Point bottomStart = new Point(bottomRight.getX() + getWidth(Border::getRight) / 2, bottomRight.getY());
-            Point bottomEnd = new Point(bottomLeft.getX() - getWidth(Border::getLeft) / 2, bottomLeft.getY());
+            Point bottomStart = Point.of(bottomRight.getX() + getWidth(Border::getRight) / 2, bottomRight.getY());
+            Point bottomEnd = Point.of(bottomLeft.getX() - getWidth(Border::getLeft) / 2, bottomLeft.getY());
             renderLine(borderBottom, bottomStart, bottomEnd, contentStream);
         }
         if (borderLeft != null && borderLeft.getWidth() > 0) {
-            Point leftStart = new Point(bottomLeft.getX(), bottomLeft.getY() + getWidth(Border::getBottom) / 2);
-            Point leftEnd = new Point(topLeft.getX(), topLeft.getY() - getWidth(Border::getTop) / 2);
+            Point leftStart = Point.of(bottomLeft.getX(), bottomLeft.getY() + getWidth(Border::getBottom) / 2);
+            Point leftEnd = Point.of(topLeft.getX(), topLeft.getY() - getWidth(Border::getTop) / 2);
             renderLine(borderLeft, leftStart, leftEnd, contentStream);
         }
     }
