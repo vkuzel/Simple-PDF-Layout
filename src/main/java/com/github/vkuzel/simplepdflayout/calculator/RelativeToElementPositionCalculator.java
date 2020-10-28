@@ -1,6 +1,7 @@
 package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.Element;
+import com.github.vkuzel.simplepdflayout.ParentElement;
 import com.github.vkuzel.simplepdflayout.property.XPosition;
 import com.github.vkuzel.simplepdflayout.property.YPosition;
 
@@ -9,12 +10,14 @@ import java.util.Set;
 
 public final class RelativeToElementPositionCalculator implements PositionCalculator {
 
+    private final ParentElement<?> parentElement;
     private final Element element;
     private final XPosition xPosition;
     private final YPosition yPosition;
     private final Element positionElement;
 
-    public RelativeToElementPositionCalculator(Element element, XPosition xPosition, YPosition yPosition, Element positionElement) {
+    public RelativeToElementPositionCalculator(ParentElement<?> parentElement, Element element, XPosition xPosition, YPosition yPosition, Element positionElement) {
+        this.parentElement = parentElement;
         this.element = element;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
@@ -24,6 +27,14 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
     @Override
     public float calculate(Set<Calculator> calculatorPath) {
         validatePath(calculatorPath);
+        if (positionElement != null) {
+            return calculateFromPositionElement(calculatorPath);
+        } else {
+            return calculateFromParentElement(calculatorPath);
+        }
+    }
+
+    private float calculateFromPositionElement(Set<Calculator> calculatorPath) {
         float position;
         if (xPosition != null) {
             switch (xPosition) {
@@ -61,5 +72,15 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
             throw new IllegalStateException("Position is not set!");
         }
         return position;
+    }
+
+    private float calculateFromParentElement(Set<Calculator> calculatorPath) {
+        if (xPosition != null) {
+            return parentElement.calculateContentX(calculatorPath);
+        } else if (yPosition != null) {
+            return parentElement.calculateContentY(calculatorPath);
+        } else {
+            throw new IllegalStateException("Position is not set!");
+        }
     }
 }

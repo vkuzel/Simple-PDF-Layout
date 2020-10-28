@@ -19,6 +19,7 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
+import static com.github.vkuzel.simplepdflayout.property.YPosition.TO_BOTTOM;
 
 public final class Box implements ParentElement<Box>, ChildElement<Box>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
@@ -57,7 +58,8 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
         this.backgroundRenderer = new BackgroundRenderer(this);
         this.childrenRenderer = new ChildrenRenderer(this);
 
-        setTopLeft(0, 0);
+        setX(0);
+        setVerticalPosition(TO_BOTTOM, getPrevious());
         setWidthPercent(100);
         setHeightOfChildren();
     }
@@ -133,16 +135,12 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     public Box setHorizontalPosition(XPosition xPosition, Element positionElement) {
-        xPositionCalculator = new RelativeToElementPositionCalculator(this, xPosition, null, positionElement);
+        xPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, xPosition, null, positionElement);
         return this;
     }
 
     public Box setVerticalPosition(YPosition yPosition, Element positionElement) {
-        if (positionElement != null) {
-            yPositionCalculator = new RelativeToElementPositionCalculator(this, null, yPosition, positionElement);
-        } else {
-            setX(0);
-        }
+        yPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, null, yPosition, positionElement);
         return this;
     }
 

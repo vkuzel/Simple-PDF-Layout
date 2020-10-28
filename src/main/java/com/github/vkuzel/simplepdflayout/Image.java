@@ -116,12 +116,12 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
     }
 
     public Image setHorizontalPosition(XPosition xPosition, Element positionElement) {
-        xPositionCalculator = new RelativeToElementPositionCalculator(this, xPosition, null, positionElement);
+        xPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, xPosition, null, positionElement);
         return this;
     }
 
     public Image setVerticalPosition(YPosition yPosition, Element positionElement) {
-        yPositionCalculator = new RelativeToElementPositionCalculator(this, null, yPosition, positionElement);
+        yPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, null, yPosition, positionElement);
         return this;
     }
 

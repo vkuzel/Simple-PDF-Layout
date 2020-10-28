@@ -20,6 +20,7 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
 import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
+import static com.github.vkuzel.simplepdflayout.property.YPosition.TO_BOTTOM;
 import static java.awt.Color.GRAY;
 
 public final class Table implements ParentElement<Table>, ChildElement<Table>, ElementWithBorder, ElementWithMargin {
@@ -58,8 +59,10 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
         this.borderRenderer = new BorderRenderer(this);
         this.childrenRenderer = new ChildrenRenderer(this);
 
-        setTopLeft(0, 0);
-        setWidthPercent(100).setHeightOfChildren();
+        setX(0);
+        setVerticalPosition(TO_BOTTOM, getPrevious());
+        setWidthPercent(100);
+        setHeightOfChildren();
         setCellConfigurer(this::configureCell);
     }
 
@@ -130,12 +133,12 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     }
 
     public Table setHorizontalPosition(XPosition xPosition, Element positionElement) {
-        xPositionCalculator = new RelativeToElementPositionCalculator(this, xPosition, null, positionElement);
+        xPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, xPosition, null, positionElement);
         return this;
     }
 
     public Table setVerticalPosition(YPosition yPosition, Element positionElement) {
-        yPositionCalculator = new RelativeToElementPositionCalculator(this, null, yPosition, positionElement);
+        yPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, null, yPosition, positionElement);
         return this;
     }
 
