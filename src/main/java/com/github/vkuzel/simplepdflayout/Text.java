@@ -8,7 +8,7 @@ import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import java.awt.*;
 import java.io.IOException;
@@ -46,7 +46,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     private Padding padding = null;
 
     private String text;
-    private Font font = Font.HELVETICA;
+    private Font font = Font.helvetica();
     private float fontSize = 11;
     private String linesSplitRegex = "\\r?\\n";
     private float firstLineLeftOffset = 0;
@@ -283,7 +283,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
                 Point pdfTextBottomLeft = parentElement.convertPointToPdfCoordinates(textBottomLeft);
 
                 contentStream.beginText();
-                contentStream.setFont(font.getPdType1Font(), fontSize);
+                contentStream.setFont(font.getPdFont(), fontSize);
                 contentStream.setNonStrokingColor(color);
                 contentStream.newLineAtOffset(pdfTextBottomLeft.getX(), pdfTextBottomLeft.getY());
                 contentStream.showText(line);
@@ -336,7 +336,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
 
     private float calculateTextWidth(String text) {
         try {
-            PDType1Font pdFont = font.getPdType1Font();
+            PDFont pdFont = font.getPdFont();
             return pdFont.getStringWidth(text) / 1000f * fontSize;
         } catch (IOException e) {
             throw new IllegalStateException(e);

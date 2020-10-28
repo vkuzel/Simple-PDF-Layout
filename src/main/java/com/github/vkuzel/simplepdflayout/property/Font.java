@@ -1,11 +1,15 @@
 package com.github.vkuzel.simplepdflayout.property;
 
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.font.PDFont;
+
+import static org.apache.pdfbox.pdmodel.font.PDType1Font.HELVETICA;
 
 @FunctionalInterface
 public interface Font {
 
-    Font HELVETICA = () -> PDType1Font.HELVETICA;
+    PDFont getPdFont();
 
-    PDType1Font getPdType1Font();
+    static Font helvetica() {
+        return () -> HELVETICA;
+    }
 }
