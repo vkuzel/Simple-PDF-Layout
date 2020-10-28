@@ -42,7 +42,6 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     private Margin margin = null;
     private Border border = null;
     private Padding padding = null;
-
     private Color backgroundColor;
 
     Box(ParentElement<?> parentElement) {
@@ -54,8 +53,8 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
         this.widthContentDimensionCalculator = new ContentDimensionCalculator(this, WIDTH);
         this.heightContentDimensionCalculator = new ContentDimensionCalculator(this, HEIGHT);
 
-        this.backgroundRenderer = new BackgroundRenderer(this);
         this.borderRenderer = new BorderRenderer(this);
+        this.backgroundRenderer = new BackgroundRenderer(this);
         this.childrenRenderer = new ChildrenRenderer(this);
 
         setTopLeft(0, 0);

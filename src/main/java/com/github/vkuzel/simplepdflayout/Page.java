@@ -117,15 +117,19 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
 
     private void setRainbowToChildrenRecursively(int level, List<ChildElement<?>> children) {
         for (int i = 0; i < children.size(); i++) {
+            float mod = i % 6;
+            float r = mod >= 3 ? 1f / level : 0;
+            float g = mod % 2 == 0 ? 1f / level : 0;
+            float b = mod <= 1 || mod >= 5 ? 1f / level : 0;
+
             ChildElement<?> child = children.get(i);
+
             if (child instanceof Box) {
-                Box box = (Box) child;
-                float mod = i % 6;
-                float r = mod >= 3 ? 1f / level : 0;
-                float g = mod % 2 == 0 ? 1f / level : 0;
-                float b = mod <= 1 || mod >= 5 ? 1f / level : 0;
-                box.setBackgroundColor(new Color(r, g, b));
+                ((Box) child).setBackgroundColor(new Color(r, g, b));
+            } else if (child instanceof Text) {
+                ((Text) child).setBackgroundColor(new Color(r, g, b));
             }
+
             if (child instanceof ParentElement) {
                 ParentElement<?> parent = (ParentElement<?>) child;
                 setRainbowToChildrenRecursively(level + 1, parent.getChildren());

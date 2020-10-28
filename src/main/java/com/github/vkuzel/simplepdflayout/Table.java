@@ -2,6 +2,8 @@ package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.calculator.*;
 import com.github.vkuzel.simplepdflayout.property.*;
+import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
 import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -20,15 +22,26 @@ import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Ax
 import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
 import static java.awt.Color.GRAY;
 
-public final class Table implements ParentElement<Table>, ChildElement<Table> {
+public final class Table implements ParentElement<Table>, ChildElement<Table>, ElementWithBorder, ElementWithMargin {
 
     private final ParentElement<?> parentElement;
     private final ChildElementCollection<Table> children;
+
+    private final ContentPositionCalculator xContentPositionCalculator;
+    private final ContentPositionCalculator yContentPositionCalculator;
+    private final ContentDimensionCalculator widthContentDimensionCalculator;
+    private final ContentDimensionCalculator heightContentDimensionCalculator;
+
+    private final BorderRenderer borderRenderer;
+    private final ChildrenRenderer childrenRenderer;
 
     private PositionCalculator xPositionCalculator;
     private PositionCalculator yPositionCalculator;
     private DimensionCalculator widthDimensionCalculator;
     private DimensionCalculator heightDimensionCalculator;
+
+    private Margin margin = null;
+    private Border border = null;
 
     private TableCellConfigurer cellConfigurer;
     private List<List<String>> data;
@@ -36,6 +49,14 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
     Table(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
         this.children = new ChildElementCollection<>(this);
+
+        this.xContentPositionCalculator = new ContentPositionCalculator(this, X);
+        this.yContentPositionCalculator = new ContentPositionCalculator(this, Y);
+        this.widthContentDimensionCalculator = new ContentDimensionCalculator(this, WIDTH);
+        this.heightContentDimensionCalculator = new ContentDimensionCalculator(this, HEIGHT);
+
+        this.borderRenderer = new BorderRenderer(this);
+        this.childrenRenderer = new ChildrenRenderer(this);
 
         setTopLeft(0, 0);
         setWidthPercent(100).setHeightOfChildren();
@@ -118,6 +139,34 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
         return this;
     }
 
+    public Table setMargin(float margin) {
+        return setMargin(Margin.of(margin));
+    }
+
+    public Table setMargin(Margin margin) {
+        this.margin = margin;
+        return this;
+    }
+
+    @Override
+    public Margin getMargin() {
+        return margin;
+    }
+
+    public Table setBorder(Line line) {
+        return setBorder(Border.of(line));
+    }
+
+    public Table setBorder(Border border) {
+        this.border = border;
+        return this;
+    }
+
+    @Override
+    public Border getBorder() {
+        return border;
+    }
+
     public Table setCellConfigurer(TableCellConfigurer cellConfigurer) {
         this.cellConfigurer = cellConfigurer;
         return this;
@@ -130,7 +179,9 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
 
     @Override
     public void render(PDDocument document, PDPageContentStream contentStream) {
+        borderRenderer.render(contentStream);
         createCells();
+        childrenRenderer.render(document, contentStream);
     }
 
     private void createCells() {
@@ -150,7 +201,7 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
                 int cellRow = row + 1;
                 int cellColumn = column + 1;
 
-                addChild(Text::new, cell -> {
+                addText(cell -> {
                     cell
                             .setWidthPercent(100f / noOfColumns)
                             .setPadding(2)
@@ -241,6 +292,16 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
     }
 
     @Override
+    public float calculateContentX(Set<Calculator> calculatorPath) {
+        return xContentPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
+    public float calculateContentY(Set<Calculator> calculatorPath) {
+        return yContentPositionCalculator.calculate(calculatorPath);
+    }
+
+    @Override
     public float calculateWidth(Set<Calculator> calculatorPath) {
         return widthDimensionCalculator.calculate(calculatorPath);
     }
@@ -251,23 +312,13 @@ public final class Table implements ParentElement<Table>, ChildElement<Table> {
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return calculateX(calculatorPath);
-    }
-
-    @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return calculateY(calculatorPath);
-    }
-
-    @Override
     public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return calculateWidth(calculatorPath);
+        return widthContentDimensionCalculator.calculate(calculatorPath);
     }
 
     @Override
     public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return calculateHeight(calculatorPath);
+        return heightContentDimensionCalculator.calculate(calculatorPath);
     }
 
     public interface TableCellConfigurer {
