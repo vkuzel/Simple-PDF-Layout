@@ -19,7 +19,6 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
-import static com.github.vkuzel.simplepdflayout.property.YPosition.TO_BOTTOM;
 
 public final class Box implements ParentElement<Box>, ChildElement<Box>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
@@ -58,8 +57,7 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
         this.backgroundRenderer = new BackgroundRenderer(this);
         this.childrenRenderer = new ChildrenRenderer(this);
 
-        setX(0);
-        setVerticalPosition(TO_BOTTOM, getPrevious());
+        setTopLeft(0, 0);
         setWidthPercent(100);
         setHeightOfChildren();
     }

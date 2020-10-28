@@ -20,7 +20,6 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
 import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
-import static com.github.vkuzel.simplepdflayout.property.YPosition.TO_BOTTOM;
 import static java.awt.Color.GRAY;
 
 public final class Table implements ParentElement<Table>, ChildElement<Table>, ElementWithBorder, ElementWithMargin {
@@ -59,8 +58,7 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
         this.borderRenderer = new BorderRenderer(this);
         this.childrenRenderer = new ChildrenRenderer(this);
 
-        setX(0);
-        setVerticalPosition(TO_BOTTOM, getPrevious());
+        setTopLeft(0, 0);
         setWidthPercent(100);
         setHeightOfChildren();
         setCellConfigurer(this::configureCell);
