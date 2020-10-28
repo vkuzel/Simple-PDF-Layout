@@ -29,6 +29,10 @@ public final class Line {
         return new Line(width, style, color);
     }
 
+    public static Line width(float width) {
+        return of(width, SOLID, BLACK);
+    }
+
     public float getWidth() {
         return width;
     }

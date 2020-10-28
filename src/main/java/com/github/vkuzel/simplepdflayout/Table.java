@@ -321,6 +321,7 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
         return heightContentDimensionCalculator.calculate(calculatorPath);
     }
 
+    @FunctionalInterface
     public interface TableCellConfigurer {
 
         void configure(Table table, Text cell, int noOfRows, int noOfColumns, int row, int column);
