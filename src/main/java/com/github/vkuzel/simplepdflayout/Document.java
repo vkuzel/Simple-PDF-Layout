@@ -68,7 +68,7 @@ public final class Document {
         return outputStream.toByteArray();
     }
 
-    public static void saveToFile(PDDocument pdDocument, String fileName) throws IOException {
+    private static void saveToFile(PDDocument pdDocument, String fileName) throws IOException {
         pdDocument.save(fileName);
     }
 }
