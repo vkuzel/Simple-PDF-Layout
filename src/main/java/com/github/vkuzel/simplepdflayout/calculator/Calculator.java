@@ -10,7 +10,10 @@ public interface Calculator {
     default void validatePath(Set<Calculator> calculatorPath) {
         if (!calculatorPath.add(this)) {
             String calculators = calculatorPath.stream().map(Object::toString).collect(Collectors.joining(" -> "));
-            throw new IllegalStateException("Circular calculator dependency. Calculators: " + calculators);
+            throw new IllegalStateException("Circular calculator dependency! Calculators: " + calculators);
+        } else if (calculatorPath.size() > 100) {
+            String calculators = calculatorPath.stream().map(Object::toString).collect(Collectors.joining(" -> "));
+            throw new IllegalStateException("Too long calculator path! Calculators: " + calculators);
         }
     }
 }

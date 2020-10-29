@@ -32,4 +32,13 @@ public final class PercentOfParentContentDimensionCalculator implements Dimensio
         }
         return dimensionPercent * parentContentDimension / 100;
     }
+
+    @Override
+    public String toString() {
+        return "PercentOfParentContentDimensionCalculator@" + Integer.toHexString(hashCode()) + "{" +
+                "parentElement=" + parentElement +
+                ", measurement=" + measurement +
+                ", dimensionPercent=" + dimensionPercent +
+                '}';
+    }
 }

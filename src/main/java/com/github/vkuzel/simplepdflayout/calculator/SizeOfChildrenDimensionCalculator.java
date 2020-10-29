@@ -3,7 +3,7 @@ package com.github.vkuzel.simplepdflayout.calculator;
 import com.github.vkuzel.simplepdflayout.ChildElement;
 import com.github.vkuzel.simplepdflayout.ParentElement;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public final class SizeOfChildrenDimensionCalculator implements DimensionCalculator {
@@ -27,22 +27,30 @@ public final class SizeOfChildrenDimensionCalculator implements DimensionCalcula
                 float leftX = MAX_VALUE;
                 float rightX = MIN_VALUE;
                 for (ChildElement<?> child : element.getChildren()) {
-                    float x = child.calculateX(new HashSet<>(calculatorPath));
+                    float x = child.calculateX(new LinkedHashSet<>(calculatorPath));
                     leftX = Math.min(leftX, x);
-                    rightX = Math.max(rightX, x + child.calculateWidth(new HashSet<>(calculatorPath)));
+                    rightX = Math.max(rightX, x + child.calculateWidth(new LinkedHashSet<>(calculatorPath)));
                 }
                 return Math.max(rightX - leftX, 0);
             case HEIGHT:
                 float topY = MAX_VALUE;
                 float bottomY = MIN_VALUE;
                 for (ChildElement<?> child : element.getChildren()) {
-                    float y = child.calculateY(new HashSet<>(calculatorPath));
+                    float y = child.calculateY(new LinkedHashSet<>(calculatorPath));
                     topY = Math.min(topY, y);
-                    bottomY = Math.max(bottomY, y + child.calculateHeight(new HashSet<>(calculatorPath)));
+                    bottomY = Math.max(bottomY, y + child.calculateHeight(new LinkedHashSet<>(calculatorPath)));
                 }
                 return Math.max(bottomY - topY, 0);
             default:
                 throw new IllegalStateException("Unsupported measurement " + measurement);
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SizeOfChildrenDimensionCalculator@" + Integer.toHexString(hashCode()) + "{" +
+                "element=" + element +
+                ", measurement=" + measurement +
+                '}';
     }
 }

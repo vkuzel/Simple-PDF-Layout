@@ -86,7 +86,7 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     private float calculateChildrenHeight(Page page) {
         float height = 0;
         for (ChildElement<?> child : page.getChildren()) {
-            height += child.calculateHeight(new HashSet<>());
+            height += child.calculateHeight(new LinkedHashSet<>());
         }
         return height;
     }

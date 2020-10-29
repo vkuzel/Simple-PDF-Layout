@@ -28,4 +28,13 @@ public final class FixedPositionCalculator implements PositionCalculator {
                 throw new IllegalStateException("Unsupported axis " + axis);
         }
     }
+
+    @Override
+    public String toString() {
+        return "FixedPositionCalculator@" + Integer.toHexString(hashCode()) + "{" +
+                "parentElement=" + parentElement +
+                ", axis=" + axis +
+                ", position=" + position +
+                '}';
+    }
 }

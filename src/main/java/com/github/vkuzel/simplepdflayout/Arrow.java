@@ -8,7 +8,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
@@ -79,8 +79,8 @@ public final class Arrow implements ChildElement<Arrow> {
     @Override
     public void render(PDDocument document, PDPageContentStream contentStream) {
         try {
-            Point start = Point.of(calculateStartX(new HashSet<>()), calculateStartY(new HashSet<>()));
-            Point end = Point.of(calculateEndX(new HashSet<>()), calculateEndY(new HashSet<>()));
+            Point start = Point.of(calculateStartX(new LinkedHashSet<>()), calculateStartY(new LinkedHashSet<>()));
+            Point end = Point.of(calculateEndX(new LinkedHashSet<>()), calculateEndY(new LinkedHashSet<>()));
             Point pdfStart = parentElement.convertPointToPdfCoordinates(start);
             Point pdfEnd = parentElement.convertPointToPdfCoordinates(end);
             float arrowSize = line.getWidth() * 5.5f;
@@ -126,8 +126,8 @@ public final class Arrow implements ChildElement<Arrow> {
 
     private float calculateStartX(Set<Calculator> calculatorPath) {
         if (startElement != null) {
-            float x = startElement.calculateX(new HashSet<>(calculatorPath));
-            float width = startElement.calculateWidth(new HashSet<>(calculatorPath));
+            float x = startElement.calculateX(new LinkedHashSet<>(calculatorPath));
+            float width = startElement.calculateWidth(new LinkedHashSet<>(calculatorPath));
             return x + width;
         } else {
             return startX;
@@ -136,8 +136,8 @@ public final class Arrow implements ChildElement<Arrow> {
 
     private float calculateStartY(Set<Calculator> calculatorPath) {
         if (startElement != null) {
-            float y = startElement.calculateY(new HashSet<>(calculatorPath));
-            float height = startElement.calculateHeight(new HashSet<>(calculatorPath));
+            float y = startElement.calculateY(new LinkedHashSet<>(calculatorPath));
+            float height = startElement.calculateHeight(new LinkedHashSet<>(calculatorPath));
             return y + height;
         } else {
             return startY;
@@ -145,7 +145,7 @@ public final class Arrow implements ChildElement<Arrow> {
     }
 
     private float calculateEndX(Set<Calculator> calculatorPath) {
-        float startX = calculateStartX(new HashSet<>());
+        float startX = calculateStartX(new LinkedHashSet<>());
         float rx;
         if (endX == null) {
             float length = calculateLength();
@@ -162,7 +162,7 @@ public final class Arrow implements ChildElement<Arrow> {
     }
 
     private float calculateEndY(Set<Calculator> calculatorPath) {
-        float startY = calculateStartY(new HashSet<>());
+        float startY = calculateStartY(new LinkedHashSet<>());
         float ry;
         if (endY == null) {
             float length = calculateLength();

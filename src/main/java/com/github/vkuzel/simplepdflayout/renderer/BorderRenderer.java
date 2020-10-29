@@ -9,7 +9,7 @@ import com.github.vkuzel.simplepdflayout.property.Point;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.function.Function;
 
 import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
@@ -72,30 +72,30 @@ public final class BorderRenderer {
     }
 
     private float calculateTopLeftX() {
-        float x = element.calculateX(new HashSet<>());
+        float x = element.calculateX(new LinkedHashSet<>());
         x += getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
         x += getWidth(Border::getLeft) / 2;
         return x;
     }
 
     private float calculateTopLeftY() {
-        float y = element.calculateY(new HashSet<>());
+        float y = element.calculateY(new LinkedHashSet<>());
         y += getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
         y += getWidth(Border::getTop) / 2;
         return y;
     }
 
     private float calculateBottomRightX() {
-        float x = element.calculateX(new HashSet<>());
-        x += element.calculateWidth(new HashSet<>());
+        float x = element.calculateX(new LinkedHashSet<>());
+        x += element.calculateWidth(new LinkedHashSet<>());
         x -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getRight);
         x -= getWidth(Border::getRight) / 2;
         return x;
     }
 
     private float calculateBottomRightY() {
-        float y = element.calculateY(new HashSet<>());
-        y += element.calculateHeight(new HashSet<>());
+        float y = element.calculateY(new LinkedHashSet<>());
+        y += element.calculateHeight(new LinkedHashSet<>());
         y -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getBottom);
         y -= getWidth(Border::getBottom) / 2;
         return y;

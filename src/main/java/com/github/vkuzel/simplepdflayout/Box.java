@@ -270,4 +270,24 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     public float calculateContentHeight(Set<Calculator> calculatorPath) {
         return heightContentDimensionCalculator.calculate(calculatorPath);
     }
+
+    @Override
+    public String toString() {
+        return "Box@" + Integer.toHexString(hashCode()) + "{" +
+                "parentElement=" + getClassName(parentElement) +
+                ", children.size=" + children.getChildren().size() +
+                ", xPositionCalculator=" + getClassName(xPositionCalculator) +
+                ", yPositionCalculator=" + getClassName(yPositionCalculator) +
+                ", widthDimensionCalculator=" + getClassName(widthDimensionCalculator) +
+                ", heightDimensionCalculator=" + getClassName(heightDimensionCalculator) +
+                '}';
+    }
+
+    private String getClassName(Object obj) {
+        if (obj != null) {
+            return obj.getClass().getSimpleName();
+        } else {
+            return "";
+        }
+    }
 }

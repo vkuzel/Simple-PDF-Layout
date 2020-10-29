@@ -8,7 +8,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.awt.*;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
 
@@ -44,26 +44,26 @@ public final class BackgroundRenderer {
     }
 
     private float calculateX() {
-        float x = element.calculateContentX(new HashSet<>());
+        float x = element.calculateContentX(new LinkedHashSet<>());
         x -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getLeft);
         return x;
     }
 
     private float calculateY() {
-        float y = element.calculateContentY(new HashSet<>());
+        float y = element.calculateContentY(new LinkedHashSet<>());
         y -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getTop);
         return y;
     }
 
     private float calculateWidth() {
-        float width = element.calculateContentWidth(new HashSet<>());
+        float width = element.calculateContentWidth(new LinkedHashSet<>());
         width += getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getLeft);
         width += getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
         return width;
     }
 
     private float calculateHeight() {
-        float height = element.calculateContentHeight(new HashSet<>());
+        float height = element.calculateContentHeight(new LinkedHashSet<>());
         height += getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getTop);
         height += getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getBottom);
         return height;

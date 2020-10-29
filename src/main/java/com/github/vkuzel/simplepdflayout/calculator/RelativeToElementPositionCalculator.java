@@ -5,7 +5,7 @@ import com.github.vkuzel.simplepdflayout.ParentElement;
 import com.github.vkuzel.simplepdflayout.property.XPosition;
 import com.github.vkuzel.simplepdflayout.property.YPosition;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public final class RelativeToElementPositionCalculator implements PositionCalculator {
@@ -39,12 +39,12 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
         if (xPosition != null) {
             switch (xPosition) {
                 case TO_LEFT:
-                    position = positionElement.calculateX(new HashSet<>(calculatorPath));
-                    position -= element.calculateWidth(new HashSet<>(calculatorPath));
+                    position = positionElement.calculateX(new LinkedHashSet<>(calculatorPath));
+                    position -= element.calculateWidth(new LinkedHashSet<>(calculatorPath));
                     break;
                 case TO_RIGHT:
-                    position = positionElement.calculateX(new HashSet<>(calculatorPath));
-                    position += positionElement.calculateWidth(new HashSet<>(calculatorPath));
+                    position = positionElement.calculateX(new LinkedHashSet<>(calculatorPath));
+                    position += positionElement.calculateWidth(new LinkedHashSet<>(calculatorPath));
                     break;
                 case OVERLAPS_FROM_LEFT:
                     position = positionElement.calculateX(calculatorPath);
@@ -55,12 +55,12 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
         } else if (yPosition != null) {
             switch (yPosition) {
                 case TO_TOP:
-                    position = positionElement.calculateY(new HashSet<>(calculatorPath));
-                    position -= element.calculateHeight(new HashSet<>(calculatorPath));
+                    position = positionElement.calculateY(new LinkedHashSet<>(calculatorPath));
+                    position -= element.calculateHeight(new LinkedHashSet<>(calculatorPath));
                     break;
                 case TO_BOTTOM:
-                    position = positionElement.calculateY(new HashSet<>(calculatorPath));
-                    position += positionElement.calculateHeight(new HashSet<>(calculatorPath));
+                    position = positionElement.calculateY(new LinkedHashSet<>(calculatorPath));
+                    position += positionElement.calculateHeight(new LinkedHashSet<>(calculatorPath));
                     break;
                 case OVERLAPS_FROM_TOP:
                     position = positionElement.calculateY(calculatorPath);
@@ -82,5 +82,16 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
         } else {
             throw new IllegalStateException("Position is not set!");
         }
+    }
+
+    @Override
+    public String toString() {
+        return "RelativeToElementPositionCalculator@" + Integer.toHexString(hashCode()) + "{" +
+                "parentElement=" + parentElement +
+                ", element=" + element +
+                ", xPosition=" + xPosition +
+                ", yPosition=" + yPosition +
+                ", positionElement=" + positionElement +
+                '}';
     }
 }

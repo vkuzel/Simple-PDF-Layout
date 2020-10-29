@@ -15,7 +15,7 @@ public class BoxModelDocumentTest {
 
     @Disabled
     @Test
-    public void generateBoxModelDocumentTest() {
+    void generateBoxModelDocumentTest() {
         Page page = Page.a4()
                 .addBox(box -> box
                         .setTopLeft(97, 100)

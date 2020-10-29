@@ -6,7 +6,7 @@ import com.github.vkuzel.simplepdflayout.property.Point;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public interface Element {
@@ -16,8 +16,8 @@ public interface Element {
     float calculateY(Set<Calculator> calculatorPath);
 
     default Point calculateTopLeft() {
-        float x = calculateX(new HashSet<>());
-        float y = calculateY(new HashSet<>());
+        float x = calculateX(new LinkedHashSet<>());
+        float y = calculateY(new LinkedHashSet<>());
         return Point.of(x, y);
     }
 
@@ -26,8 +26,8 @@ public interface Element {
     float calculateHeight(Set<Calculator> calculatorPath);
 
     default Dimension calculateDimension() {
-        float width = calculateWidth(new HashSet<>());
-        float height = calculateHeight(new HashSet<>());
+        float width = calculateWidth(new LinkedHashSet<>());
+        float height = calculateHeight(new LinkedHashSet<>());
         return Dimension.of(width, height);
     }
 
@@ -36,8 +36,8 @@ public interface Element {
     float calculateContentY(Set<Calculator> calculatorPath);
 
     default Point calculateContentTopLeft() {
-        float x = calculateContentX(new HashSet<>());
-        float y = calculateContentY(new HashSet<>());
+        float x = calculateContentX(new LinkedHashSet<>());
+        float y = calculateContentY(new LinkedHashSet<>());
         return Point.of(x, y);
     }
 
@@ -46,8 +46,8 @@ public interface Element {
     float calculateContentHeight(Set<Calculator> calculatorPath);
 
     default Dimension calculateContentDimension() {
-        float width = calculateContentWidth(new HashSet<>());
-        float height = calculateContentHeight(new HashSet<>());
+        float width = calculateContentWidth(new LinkedHashSet<>());
+        float height = calculateContentHeight(new LinkedHashSet<>());
         return Dimension.of(width, height);
     }
 

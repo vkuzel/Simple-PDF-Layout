@@ -11,7 +11,7 @@ public class TextTest {
     private static final Page ANY_PAGE = Page.a4();
 
     @Test
-    public void textIsProperlyWrapped() {
+    void textIsProperlyWrapped() {
         // given
         float firstLineOffset = 30;
         float maxWidth = 60;

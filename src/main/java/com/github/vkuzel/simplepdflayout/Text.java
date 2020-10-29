@@ -256,7 +256,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
 
     private void renderText(PDPageContentStream contentStream) {
         Point contentTopLeft = calculateContentTopLeft();
-        float width = calculateContentWidth(new HashSet<>());
+        float width = calculateContentWidth(new LinkedHashSet<>());
         List<String> lines = getLines();
 
         try {

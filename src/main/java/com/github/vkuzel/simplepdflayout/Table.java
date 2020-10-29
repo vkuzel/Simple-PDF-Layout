@@ -9,7 +9,7 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -218,8 +218,8 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
                     float cellX = offset.x;
                     float cellY = offset.y;
 
-                    float cellWidth = cell.calculateWidth(new HashSet<>());
-                    float cellHeight = cell.calculateHeight(new HashSet<>());
+                    float cellWidth = cell.calculateWidth(new LinkedHashSet<>());
+                    float cellHeight = cell.calculateHeight(new LinkedHashSet<>());
                     offset.x += cellWidth;
                     offset.rowHeight = Math.max(offset.rowHeight, cellHeight);
 

@@ -2,7 +2,7 @@ package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.ParentElement;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public final class PercentOfParentPositionCalculator implements PositionCalculator {
@@ -24,16 +24,25 @@ public final class PercentOfParentPositionCalculator implements PositionCalculat
         float parentContentDimension;
         switch (axis) {
             case X:
-                parentContentPosition = parentElement.calculateContentX(new HashSet<>(calculatorPath));
-                parentContentDimension = parentElement.calculateContentWidth(new HashSet<>(calculatorPath));
+                parentContentPosition = parentElement.calculateContentX(new LinkedHashSet<>(calculatorPath));
+                parentContentDimension = parentElement.calculateContentWidth(new LinkedHashSet<>(calculatorPath));
                 break;
             case Y:
-                parentContentPosition = parentElement.calculateContentY(new HashSet<>(calculatorPath));
-                parentContentDimension = parentElement.calculateContentHeight(new HashSet<>(calculatorPath));
+                parentContentPosition = parentElement.calculateContentY(new LinkedHashSet<>(calculatorPath));
+                parentContentDimension = parentElement.calculateContentHeight(new LinkedHashSet<>(calculatorPath));
                 break;
             default:
                 throw new IllegalStateException("Unsupported axis " + axis);
         }
         return parentContentPosition + positionPercent * parentContentDimension / 100;
+    }
+
+    @Override
+    public String toString() {
+        return "PercentOfParentPositionCalculator@" + Integer.toHexString(hashCode()) + "{" +
+                "parentElement=" + parentElement +
+                ", axis=" + axis +
+                ", positionPercent=" + positionPercent +
+                '}';
     }
 }
