@@ -4,7 +4,7 @@ import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-public class RenderingContext {
+public final class RenderingContext {
 
     private final PDDocument document;
     private final PDPageContentStream contentStream;

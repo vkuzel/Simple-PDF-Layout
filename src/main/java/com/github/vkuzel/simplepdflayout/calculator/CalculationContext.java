@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public class CalculationContext {
+public final class CalculationContext {
 
     private static final String CYCLE_DEPENDENCIES_MSG = "Circular element dependencies!\n" +
             "Calculator: %s\n" +
