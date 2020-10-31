@@ -1,15 +1,13 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.calculator.Calculator;
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
 import com.github.vkuzel.simplepdflayout.property.Line;
 import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.property.Vector;
-import org.apache.pdfbox.pdmodel.PDDocument;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
 import static java.awt.Color.RED;
@@ -77,10 +75,13 @@ public final class Arrow implements ChildElement<Arrow> {
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
+    public void render(RenderingContext renderingContext) {
         try {
-            Point start = Point.of(calculateStartX(new LinkedHashSet<>()), calculateStartY(new LinkedHashSet<>()));
-            Point end = Point.of(calculateEndX(new LinkedHashSet<>()), calculateEndY(new LinkedHashSet<>()));
+            PDPageContentStream contentStream = renderingContext.getContentStream();
+            CalculationContext calculationContext = renderingContext.getCalculationContext();
+
+            Point start = Point.of(calculateStartX(calculationContext), calculateStartY(calculationContext));
+            Point end = Point.of(calculateEndX(calculationContext), calculateEndY(calculationContext));
             Point pdfStart = parentElement.convertPointToPdfCoordinates(start);
             Point pdfEnd = parentElement.convertPointToPdfCoordinates(end);
             float arrowSize = line.getWidth() * 5.5f;
@@ -124,34 +125,34 @@ public final class Arrow implements ChildElement<Arrow> {
         }
     }
 
-    private float calculateStartX(Set<Calculator> calculatorPath) {
+    private float calculateStartX(CalculationContext calculationContext) {
         if (startElement != null) {
-            float x = startElement.calculateX(new LinkedHashSet<>(calculatorPath));
-            float width = startElement.calculateWidth(new LinkedHashSet<>(calculatorPath));
+            float x = startElement.calculateX(calculationContext);
+            float width = startElement.calculateWidth(calculationContext);
             return x + width;
         } else {
             return startX;
         }
     }
 
-    private float calculateStartY(Set<Calculator> calculatorPath) {
+    private float calculateStartY(CalculationContext calculationContext) {
         if (startElement != null) {
-            float y = startElement.calculateY(new LinkedHashSet<>(calculatorPath));
-            float height = startElement.calculateHeight(new LinkedHashSet<>(calculatorPath));
+            float y = startElement.calculateY(calculationContext);
+            float height = startElement.calculateHeight(calculationContext);
             return y + height;
         } else {
             return startY;
         }
     }
 
-    private float calculateEndX(Set<Calculator> calculatorPath) {
-        float startX = calculateStartX(new LinkedHashSet<>());
+    private float calculateEndX(CalculationContext calculationContext) {
+        float startX = calculateStartX(calculationContext);
         float rx;
         if (endX == null) {
             float length = calculateLength();
             rx = startX + length;
             Element rootElement = getRootElement();
-            float rootElementContentWidth = rootElement.calculateContentWidth(calculatorPath);
+            float rootElementContentWidth = rootElement.calculateContentWidth(calculationContext);
             if (rx > rootElementContentWidth) {
                 rx = startX - length;
             }
@@ -161,14 +162,14 @@ public final class Arrow implements ChildElement<Arrow> {
         return rx;
     }
 
-    private float calculateEndY(Set<Calculator> calculatorPath) {
-        float startY = calculateStartY(new LinkedHashSet<>());
+    private float calculateEndY(CalculationContext calculationContext) {
+        float startY = calculateStartY(calculationContext);
         float ry;
         if (endY == null) {
             float length = calculateLength();
             ry = startY + length;
             Element rootElement = getRootElement();
-            float rootElementContentHeight = rootElement.calculateContentHeight(calculatorPath);
+            float rootElementContentHeight = rootElement.calculateContentHeight(calculationContext);
             if (ry > rootElementContentHeight) {
                 ry = startY - length;
             }
@@ -191,42 +192,42 @@ public final class Arrow implements ChildElement<Arrow> {
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
-        return Math.min(calculateStartX(calculatorPath), calculateEndX(calculatorPath));
+    public float calculateX(CalculationContext calculationContext) {
+        return Math.min(calculateStartX(calculationContext), calculateEndX(calculationContext));
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
-        return Math.min(calculateStartY(calculatorPath), calculateEndY(calculatorPath));
+    public float calculateY(CalculationContext calculationContext) {
+        return Math.min(calculateStartY(calculationContext), calculateEndY(calculationContext));
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return Math.abs(calculateStartX(calculatorPath) - calculateEndX(calculatorPath));
+    public float calculateWidth(CalculationContext calculationContext) {
+        return Math.abs(calculateStartX(calculationContext) - calculateEndX(calculationContext));
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return Math.abs(calculateStartY(calculatorPath) - calculateEndY(calculatorPath));
+    public float calculateHeight(CalculationContext calculationContext) {
+        return Math.abs(calculateStartY(calculationContext) - calculateEndY(calculationContext));
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return calculateX(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return calculateX(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return calculateY(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return calculateY(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return calculateWidth(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return calculateWidth(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return calculateHeight(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return calculateHeight(calculationContext);
     }
 }

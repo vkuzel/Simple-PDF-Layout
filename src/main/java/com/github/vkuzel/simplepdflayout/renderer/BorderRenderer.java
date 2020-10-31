@@ -2,6 +2,7 @@ package com.github.vkuzel.simplepdflayout.renderer;
 
 import com.github.vkuzel.simplepdflayout.ElementWithBorder;
 import com.github.vkuzel.simplepdflayout.ElementWithMargin;
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
 import com.github.vkuzel.simplepdflayout.property.Border;
 import com.github.vkuzel.simplepdflayout.property.Line;
 import com.github.vkuzel.simplepdflayout.property.Margin;
@@ -9,7 +10,6 @@ import com.github.vkuzel.simplepdflayout.property.Point;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
 import java.util.function.Function;
 
 import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
@@ -22,9 +22,12 @@ public final class BorderRenderer {
         this.element = element;
     }
 
-    public void render(PDPageContentStream contentStream) {
-        Point topLeft = Point.of(calculateTopLeftX(), calculateTopLeftY());
-        Point bottomRight = Point.of(calculateBottomRightX(), calculateBottomRightY());
+    public void render(RenderingContext renderingContext) {
+        PDPageContentStream contentStream = renderingContext.getContentStream();
+        CalculationContext calculationContext = renderingContext.getCalculationContext();
+
+        Point topLeft = Point.of(calculateTopLeftX(calculationContext), calculateTopLeftY(calculationContext));
+        Point bottomRight = Point.of(calculateBottomRightX(calculationContext), calculateBottomRightY(calculationContext));
         Point topRight = Point.of(bottomRight.getX(), topLeft.getY());
         Point bottomLeft = Point.of(topLeft.getX(), bottomRight.getY());
 
@@ -71,31 +74,31 @@ public final class BorderRenderer {
         }
     }
 
-    private float calculateTopLeftX() {
-        float x = element.calculateX(new LinkedHashSet<>());
+    private float calculateTopLeftX(CalculationContext calculationContext) {
+        float x = element.calculateX(calculationContext);
         x += getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
         x += getWidth(Border::getLeft) / 2;
         return x;
     }
 
-    private float calculateTopLeftY() {
-        float y = element.calculateY(new LinkedHashSet<>());
+    private float calculateTopLeftY(CalculationContext calculationContext) {
+        float y = element.calculateY(calculationContext);
         y += getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
         y += getWidth(Border::getTop) / 2;
         return y;
     }
 
-    private float calculateBottomRightX() {
-        float x = element.calculateX(new LinkedHashSet<>());
-        x += element.calculateWidth(new LinkedHashSet<>());
+    private float calculateBottomRightX(CalculationContext calculationContext) {
+        float x = element.calculateX(calculationContext);
+        x += element.calculateWidth(calculationContext);
         x -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getRight);
         x -= getWidth(Border::getRight) / 2;
         return x;
     }
 
-    private float calculateBottomRightY() {
-        float y = element.calculateY(new LinkedHashSet<>());
-        y += element.calculateHeight(new LinkedHashSet<>());
+    private float calculateBottomRightY(CalculationContext calculationContext) {
+        float y = element.calculateY(calculationContext);
+        y += element.calculateHeight(calculationContext);
         y -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getBottom);
         y -= getWidth(Border::getBottom) / 2;
         return y;

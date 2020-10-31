@@ -4,14 +4,11 @@ import com.github.vkuzel.simplepdflayout.calculator.*;
 import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -179,13 +176,13 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
-        borderRenderer.render(contentStream);
-        createCells();
-        childrenRenderer.render(document, contentStream);
+    public void render(RenderingContext renderingContext) {
+        borderRenderer.render(renderingContext);
+        createCells(renderingContext.getCalculationContext());
+        childrenRenderer.render(renderingContext);
     }
 
-    private void createCells() {
+    private void createCells(CalculationContext calculationContext) {
         int noOfRows = data.size();
         int noOfColumns = data.isEmpty() || data.get(0).isEmpty() ? 0 : data.get(0).size();
 
@@ -218,8 +215,8 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
                     float cellX = offset.x;
                     float cellY = offset.y;
 
-                    float cellWidth = cell.calculateWidth(new LinkedHashSet<>());
-                    float cellHeight = cell.calculateHeight(new LinkedHashSet<>());
+                    float cellWidth = cell.calculateWidth(calculationContext);
+                    float cellHeight = cell.calculateHeight(calculationContext);
                     offset.x += cellWidth;
                     offset.rowHeight = Math.max(offset.rowHeight, cellHeight);
 
@@ -283,43 +280,43 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
-        return xPositionCalculator.calculate(calculatorPath);
+    public float calculateX(CalculationContext calculationContext) {
+        return xPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
-        return yPositionCalculator.calculate(calculatorPath);
+    public float calculateY(CalculationContext calculationContext) {
+        return yPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return xContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return xContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return yContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return yContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return widthDimensionCalculator.calculate(calculatorPath);
+    public float calculateWidth(CalculationContext calculationContext) {
+        return widthDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return heightDimensionCalculator.calculate(calculatorPath);
+    public float calculateHeight(CalculationContext calculationContext) {
+        return heightDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return widthContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return widthContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return heightContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return heightContentDimensionCalculator.calculate(calculationContext);
     }
 
     @FunctionalInterface

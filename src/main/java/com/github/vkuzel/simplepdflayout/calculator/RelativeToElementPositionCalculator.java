@@ -5,9 +5,6 @@ import com.github.vkuzel.simplepdflayout.ParentElement;
 import com.github.vkuzel.simplepdflayout.property.XPosition;
 import com.github.vkuzel.simplepdflayout.property.YPosition;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 public final class RelativeToElementPositionCalculator implements PositionCalculator {
 
     private final ParentElement<?> parentElement;
@@ -25,29 +22,32 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
     }
 
     @Override
-    public float calculate(Set<Calculator> calculatorPath) {
-        validatePath(calculatorPath);
+    public float calculate(CalculationContext calculationContext) {
+        return calculationContext.compute(this, this::calculateInternal);
+    }
+
+    private float calculateInternal(CalculationContext calculationContext) {
         if (positionElement != null) {
-            return calculateFromPositionElement(calculatorPath);
+            return calculateFromPositionElement(calculationContext);
         } else {
-            return calculateFromParentElement(calculatorPath);
+            return calculateFromParentElement(calculationContext);
         }
     }
 
-    private float calculateFromPositionElement(Set<Calculator> calculatorPath) {
+    private float calculateFromPositionElement(CalculationContext calculationContext) {
         float position;
         if (xPosition != null) {
             switch (xPosition) {
                 case TO_LEFT:
-                    position = positionElement.calculateX(new LinkedHashSet<>(calculatorPath));
-                    position -= element.calculateWidth(new LinkedHashSet<>(calculatorPath));
+                    position = positionElement.calculateX(calculationContext);
+                    position -= element.calculateWidth(calculationContext);
                     break;
                 case TO_RIGHT:
-                    position = positionElement.calculateX(new LinkedHashSet<>(calculatorPath));
-                    position += positionElement.calculateWidth(new LinkedHashSet<>(calculatorPath));
+                    position = positionElement.calculateX(calculationContext);
+                    position += positionElement.calculateWidth(calculationContext);
                     break;
                 case OVERLAPS_FROM_LEFT:
-                    position = positionElement.calculateX(calculatorPath);
+                    position = positionElement.calculateX(calculationContext);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported XPosition " + xPosition);
@@ -55,15 +55,15 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
         } else if (yPosition != null) {
             switch (yPosition) {
                 case TO_TOP:
-                    position = positionElement.calculateY(new LinkedHashSet<>(calculatorPath));
-                    position -= element.calculateHeight(new LinkedHashSet<>(calculatorPath));
+                    position = positionElement.calculateY(calculationContext);
+                    position -= element.calculateHeight(calculationContext);
                     break;
                 case TO_BOTTOM:
-                    position = positionElement.calculateY(new LinkedHashSet<>(calculatorPath));
-                    position += positionElement.calculateHeight(new LinkedHashSet<>(calculatorPath));
+                    position = positionElement.calculateY(calculationContext);
+                    position += positionElement.calculateHeight(calculationContext);
                     break;
                 case OVERLAPS_FROM_TOP:
-                    position = positionElement.calculateY(calculatorPath);
+                    position = positionElement.calculateY(calculationContext);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported YPosition " + yPosition);
@@ -74,11 +74,11 @@ public final class RelativeToElementPositionCalculator implements PositionCalcul
         return position;
     }
 
-    private float calculateFromParentElement(Set<Calculator> calculatorPath) {
+    private float calculateFromParentElement(CalculationContext calculationContext) {
         if (xPosition != null) {
-            return parentElement.calculateContentX(calculatorPath);
+            return parentElement.calculateContentX(calculationContext);
         } else if (yPosition != null) {
-            return parentElement.calculateContentY(calculatorPath);
+            return parentElement.calculateContentY(calculationContext);
         } else {
             throw new IllegalStateException("Position is not set!");
         }

@@ -5,13 +5,11 @@ import com.github.vkuzel.simplepdflayout.property.Dimension;
 import com.github.vkuzel.simplepdflayout.property.Padding;
 import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.awt.*;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -108,11 +106,11 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
+    public void render(RenderingContext renderingContext) {
         if (rainbow) {
             setRainbowToChildrenRecursively(1, children.getChildren());
         }
-        childrenRenderer.render(document, contentStream);
+        childrenRenderer.render(renderingContext);
     }
 
     private void setRainbowToChildrenRecursively(int level, List<ChildElement<?>> children) {
@@ -138,43 +136,43 @@ public final class Page implements ParentElement<Page>, ElementWithPadding {
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
+    public float calculateX(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
+    public float calculateY(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return widthDimensionCalculator.calculate(calculatorPath);
+    public float calculateWidth(CalculationContext calculationContext) {
+        return widthDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return heightDimensionCalculator.calculate(calculatorPath);
+    public float calculateHeight(CalculationContext calculationContext) {
+        return heightDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return xContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return xContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return yContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return yContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return widthContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return widthContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return heightContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return heightContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override

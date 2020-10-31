@@ -1,6 +1,7 @@
 package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.property.Dimension;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -58,7 +59,8 @@ public final class Document {
         PDPage pdPage = new PDPage(dimension.toPdRectangle());
         pdDocument.addPage(pdPage);
         try (PDPageContentStream contentStream = new PDPageContentStream(pdDocument, pdPage)) {
-            page.render(pdDocument, contentStream);
+            RenderingContext renderingContext = new RenderingContext(pdDocument, contentStream);
+            page.render(renderingContext);
         }
     }
 

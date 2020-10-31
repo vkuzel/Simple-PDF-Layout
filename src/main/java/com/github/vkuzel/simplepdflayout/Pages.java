@@ -1,12 +1,13 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.calculator.Calculator;
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
 import com.github.vkuzel.simplepdflayout.property.Dimension;
 import com.github.vkuzel.simplepdflayout.property.Padding;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -44,7 +45,11 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     }
 
     private Page getCurrentPage() {
-        return !pages.isEmpty() ? pages.get(pages.size() - 1) : null;
+        if (!pages.isEmpty()) {
+            return pages.get(pages.size() - 1);
+        } else {
+            throw new IllegalStateException("Empty pages!");
+        }
     }
 
     public List<Page> getPages() {
@@ -52,17 +57,19 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
+    public void render(RenderingContext renderingContext) {
         for (Page page : pages) {
-            page.render(document, contentStream);
+            page.render(renderingContext);
         }
     }
 
     @Override
     public <C extends ChildElement<C>> Pages addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer) {
-        Page currentPage = getCurrentPage();
-        if (currentPage == null) {
+        Page currentPage;
+        if (pages.isEmpty()) {
             currentPage = createPage();
+        } else {
+            currentPage = getCurrentPage();
         }
         currentPage.addChild(childFactory, childConfigurer);
 
@@ -84,9 +91,10 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     }
 
     private float calculateChildrenHeight(Page page) {
+        CalculationContext calculationContext = new CalculationContext();
         float height = 0;
         for (ChildElement<?> child : page.getChildren()) {
-            height += child.calculateHeight(new LinkedHashSet<>());
+            height += child.calculateHeight(calculationContext);
         }
         return height;
     }
@@ -121,42 +129,42 @@ public final class Pages implements ParentElement<Pages>, ElementWithPadding {
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateX(calculatorPath);
+    public float calculateX(CalculationContext calculationContext) {
+        return getCurrentPage().calculateX(calculationContext);
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateY(calculatorPath);
+    public float calculateY(CalculationContext calculationContext) {
+        return getCurrentPage().calculateY(calculationContext);
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateWidth(calculatorPath);
+    public float calculateWidth(CalculationContext calculationContext) {
+        return getCurrentPage().calculateWidth(calculationContext);
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateHeight(calculatorPath);
+    public float calculateHeight(CalculationContext calculationContext) {
+        return getCurrentPage().calculateHeight(calculationContext);
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateContentX(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return getCurrentPage().calculateContentX(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateContentY(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return getCurrentPage().calculateContentY(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateWidth(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return getCurrentPage().calculateWidth(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return getCurrentPage().calculateContentHeight(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return getCurrentPage().calculateContentHeight(calculationContext);
     }
 }

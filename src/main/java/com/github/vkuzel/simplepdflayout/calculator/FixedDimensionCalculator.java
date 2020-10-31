@@ -1,7 +1,5 @@
 package com.github.vkuzel.simplepdflayout.calculator;
 
-import java.util.Set;
-
 public final class FixedDimensionCalculator implements DimensionCalculator {
 
     private final float dimension;
@@ -11,8 +9,7 @@ public final class FixedDimensionCalculator implements DimensionCalculator {
     }
 
     @Override
-    public float calculate(Set<Calculator> calculatorPath) {
-        validatePath(calculatorPath);
-        return dimension;
+    public float calculate(CalculationContext calculationContext) {
+        return calculationContext.compute(this, cc -> dimension);
     }
 }

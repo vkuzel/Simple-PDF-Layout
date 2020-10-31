@@ -8,8 +8,6 @@ import com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurem
 import com.github.vkuzel.simplepdflayout.property.Margin;
 import com.github.vkuzel.simplepdflayout.property.Padding;
 
-import java.util.Set;
-
 import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
 
 public final class ContentDimensionCalculator implements Calculator {
@@ -23,12 +21,15 @@ public final class ContentDimensionCalculator implements Calculator {
     }
 
     @Override
-    public float calculate(Set<Calculator> calculatorPath) {
-        validatePath(calculatorPath);
+    public float calculate(CalculationContext calculationContext) {
+        return calculationContext.compute(this, this::calculateInternal);
+    }
+
+    private float calculateInternal(CalculationContext calculationContext) {
         float dimension;
         switch (measurement) {
             case WIDTH:
-                dimension = element.calculateWidth(calculatorPath);
+                dimension = element.calculateWidth(calculationContext);
                 dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
                 dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getRight);
                 dimension -= getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getLeft().getWidth());
@@ -37,7 +38,7 @@ public final class ContentDimensionCalculator implements Calculator {
                 dimension -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
                 break;
             case HEIGHT:
-                dimension = element.calculateHeight(calculatorPath);
+                dimension = element.calculateHeight(calculationContext);
                 dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
                 dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getBottom);
                 dimension -= getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getTop().getWidth());

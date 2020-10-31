@@ -2,8 +2,6 @@ package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.ParentElement;
 
-import java.util.Set;
-
 public final class FixedPositionCalculator implements PositionCalculator {
 
     private final ParentElement<?> parentElement;
@@ -17,13 +15,16 @@ public final class FixedPositionCalculator implements PositionCalculator {
     }
 
     @Override
-    public float calculate(Set<Calculator> calculatorPath) {
-        validatePath(calculatorPath);
+    public float calculate(CalculationContext calculationContext) {
+        return calculationContext.compute(this, this::calculateInternal);
+    }
+
+    private float calculateInternal(CalculationContext calculationContext) {
         switch (axis) {
             case X:
-                return parentElement.calculateContentX(calculatorPath) + position;
+                return parentElement.calculateContentX(calculationContext) + position;
             case Y:
-                return parentElement.calculateContentY(calculatorPath) + position;
+                return parentElement.calculateContentY(calculationContext) + position;
             default:
                 throw new IllegalStateException("Unsupported axis " + axis);
         }

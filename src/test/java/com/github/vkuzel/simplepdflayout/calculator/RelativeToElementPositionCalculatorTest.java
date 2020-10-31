@@ -5,8 +5,6 @@ import com.github.vkuzel.simplepdflayout.stub.ParentElementStub;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashSet;
-
 class RelativeToElementPositionCalculatorTest {
 
     @Test
@@ -16,7 +14,7 @@ class RelativeToElementPositionCalculatorTest {
         RelativeToElementPositionCalculator calculator = new RelativeToElementPositionCalculator(parentElement, null, XPosition.TO_LEFT, null, null);
 
         // when
-        float position = calculator.calculate(new HashSet<>());
+        float position = calculator.calculate(new CalculationContext());
 
         // then
         Assertions.assertEquals(100, position, 0.0001);

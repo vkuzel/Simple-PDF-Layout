@@ -17,14 +17,14 @@ public class BoxTest {
     private Box box;
 
     @BeforeEach
-    public void init() {
+    void init() {
         Page.of(PAGE_DIMENSION)
                 .setPadding(PAGE_PADDING)
                 .addBox(box -> this.box = box);
     }
 
     @Test
-    public void absoluteBoxPositionIsCorrectlyCalculated() {
+    void absoluteBoxPositionIsCorrectlyCalculated() {
         // given
         box.setTopLeft(10, 10);
 
@@ -37,7 +37,7 @@ public class BoxTest {
     }
 
     @Test
-    public void fiftyPercentBoxPositionIsInTheMiddleOfPage() {
+    void fiftyPercentBoxPositionIsInTheMiddleOfPage() {
         // given
         box.setTopLeftPercent(50, 50);
 
@@ -50,7 +50,7 @@ public class BoxTest {
     }
 
     @Test
-    public void hundredPercentBoxDimensionEqualsToPageContentDimension() {
+    void hundredPercentBoxDimensionEqualsToPageContentDimension() {
         // given
         box.setDimensionPercent(100, 100);
 
@@ -63,7 +63,7 @@ public class BoxTest {
     }
 
     @Test
-    public void fiftyPercentBoxDimensionIsHalfOfThePageContentSize() {
+    void fiftyPercentBoxDimensionIsHalfOfThePageContentSize() {
         // given
         box.setDimensionPercent(50, 50);
 
@@ -73,5 +73,19 @@ public class BoxTest {
         // then
         assertEquals(PAGE_CONTENT_WIDTH / 2, dimension.getWidth(), 0.001);
         assertEquals(PAGE_CONTENT_HEIGHT / 2, dimension.getHeight(), 0.001);
+    }
+
+    @Test
+    void calculatePositionWithNestedBoxShouldNotFail() {
+        // given
+        box.addBox(ignored -> {
+        });
+
+        // when
+        Point topLeft = box.calculateTopLeft();
+
+        // then
+        assertEquals(PAGE_PADDING, topLeft.getX(), 0.001);
+        assertEquals(PAGE_PADDING, topLeft.getY(), 0.001);
     }
 }

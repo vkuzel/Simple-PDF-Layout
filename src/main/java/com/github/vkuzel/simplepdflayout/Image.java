@@ -6,14 +6,12 @@ import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Set;
 
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.HEIGHT;
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
@@ -188,13 +186,13 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
-        backgroundRenderer.render(contentStream);
-        renderImage(document, contentStream);
-        borderRenderer.render(contentStream);
+    public void render(RenderingContext renderingContext) {
+        backgroundRenderer.render(renderingContext);
+        renderImage(renderingContext);
+        borderRenderer.render(renderingContext);
     }
 
-    private void renderImage(PDDocument document, PDPageContentStream contentStream) {
+    private void renderImage(RenderingContext renderingContext) {
         if (!imageFile.exists()) {
             throw new IllegalStateException("Image file " + imageFile.getAbsolutePath() + " not found!");
         }
@@ -205,50 +203,52 @@ public final class Image implements ChildElement<Image>, ElementWithMargin, Elem
         Point pdfBottomLeft = convertPointToPdfCoordinates(bottomLeft);
 
         try {
-            PDImageXObject image = PDImageXObject.createFromFileByContent(imageFile, document);
-            contentStream.drawImage(image, pdfBottomLeft.getX(), pdfBottomLeft.getY(), dimension.getWidth(), dimension.getHeight());
+            PDImageXObject image = PDImageXObject.createFromFileByContent(imageFile, renderingContext.getDocument());
+            renderingContext
+                    .getContentStream()
+                    .drawImage(image, pdfBottomLeft.getX(), pdfBottomLeft.getY(), dimension.getWidth(), dimension.getHeight());
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
-        return xPositionCalculator.calculate(calculatorPath);
+    public float calculateX(CalculationContext calculationContext) {
+        return xPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
-        return yPositionCalculator.calculate(calculatorPath);
+    public float calculateY(CalculationContext calculationContext) {
+        return yPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return xContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return xContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return yContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return yContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return widthDimensionCalculator.calculate(calculatorPath);
+    public float calculateWidth(CalculationContext calculationContext) {
+        return widthDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return heightDimensionCalculator.calculate(calculatorPath);
+    public float calculateHeight(CalculationContext calculationContext) {
+        return heightDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return widthContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return widthContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return heightContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return heightContentDimensionCalculator.calculate(calculationContext);
     }
 }

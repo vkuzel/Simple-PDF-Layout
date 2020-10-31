@@ -2,8 +2,6 @@ package com.github.vkuzel.simplepdflayout.renderer;
 
 import com.github.vkuzel.simplepdflayout.ChildElement;
 import com.github.vkuzel.simplepdflayout.ParentElement;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 public final class ChildrenRenderer {
 
@@ -13,9 +11,9 @@ public final class ChildrenRenderer {
         this.element = element;
     }
 
-    public void render(PDDocument document, PDPageContentStream contentStream) {
+    public void render(RenderingContext renderingContext) {
         for (ChildElement<?> child : element.getChildren()) {
-            child.render(document, contentStream);
+            child.render(renderingContext);
         }
     }
 }

@@ -2,9 +2,6 @@ package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.ParentElement;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 public final class PercentOfParentPositionCalculator implements PositionCalculator {
 
     private final ParentElement<?> parentElement;
@@ -18,18 +15,21 @@ public final class PercentOfParentPositionCalculator implements PositionCalculat
     }
 
     @Override
-    public float calculate(Set<Calculator> calculatorPath) {
-        validatePath(calculatorPath);
+    public float calculate(CalculationContext calculationContext) {
+        return calculationContext.compute(this, this::calculateInternal);
+    }
+
+    private float calculateInternal(CalculationContext calculationContext) {
         float parentContentPosition;
         float parentContentDimension;
         switch (axis) {
             case X:
-                parentContentPosition = parentElement.calculateContentX(new LinkedHashSet<>(calculatorPath));
-                parentContentDimension = parentElement.calculateContentWidth(new LinkedHashSet<>(calculatorPath));
+                parentContentPosition = parentElement.calculateContentX(calculationContext);
+                parentContentDimension = parentElement.calculateContentWidth(calculationContext);
                 break;
             case Y:
-                parentContentPosition = parentElement.calculateContentY(new LinkedHashSet<>(calculatorPath));
-                parentContentDimension = parentElement.calculateContentHeight(new LinkedHashSet<>(calculatorPath));
+                parentContentPosition = parentElement.calculateContentY(calculationContext);
+                parentContentDimension = parentElement.calculateContentHeight(calculationContext);
                 break;
             default:
                 throw new IllegalStateException("Unsupported axis " + axis);

@@ -1,57 +1,57 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.calculator.Calculator;
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
 import com.github.vkuzel.simplepdflayout.property.Dimension;
 import com.github.vkuzel.simplepdflayout.property.Point;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-
-import java.util.LinkedHashSet;
-import java.util.Set;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 
 public interface Element {
 
-    float calculateX(Set<Calculator> calculatorPath);
+    float calculateX(CalculationContext calculationContext);
 
-    float calculateY(Set<Calculator> calculatorPath);
+    float calculateY(CalculationContext calculationContext);
 
     default Point calculateTopLeft() {
-        float x = calculateX(new LinkedHashSet<>());
-        float y = calculateY(new LinkedHashSet<>());
+        CalculationContext calculationContext = new CalculationContext();
+        float x = calculateX(calculationContext);
+        float y = calculateY(calculationContext);
         return Point.of(x, y);
     }
 
-    float calculateWidth(Set<Calculator> calculatorPath);
+    float calculateWidth(CalculationContext calculationContext);
 
-    float calculateHeight(Set<Calculator> calculatorPath);
+    float calculateHeight(CalculationContext calculationContext);
 
     default Dimension calculateDimension() {
-        float width = calculateWidth(new LinkedHashSet<>());
-        float height = calculateHeight(new LinkedHashSet<>());
+        CalculationContext calculationContext = new CalculationContext();
+        float width = calculateWidth(calculationContext);
+        float height = calculateHeight(calculationContext);
         return Dimension.of(width, height);
     }
 
-    float calculateContentX(Set<Calculator> calculatorPath);
+    float calculateContentX(CalculationContext calculationContext);
 
-    float calculateContentY(Set<Calculator> calculatorPath);
+    float calculateContentY(CalculationContext calculationContext);
 
     default Point calculateContentTopLeft() {
-        float x = calculateContentX(new LinkedHashSet<>());
-        float y = calculateContentY(new LinkedHashSet<>());
+        CalculationContext calculationContext = new CalculationContext();
+        float x = calculateContentX(calculationContext);
+        float y = calculateContentY(calculationContext);
         return Point.of(x, y);
     }
 
-    float calculateContentWidth(Set<Calculator> calculatorPath);
+    float calculateContentWidth(CalculationContext calculationContext);
 
-    float calculateContentHeight(Set<Calculator> calculatorPath);
+    float calculateContentHeight(CalculationContext calculationContext);
 
     default Dimension calculateContentDimension() {
-        float width = calculateContentWidth(new LinkedHashSet<>());
-        float height = calculateContentHeight(new LinkedHashSet<>());
+        CalculationContext calculationContext = new CalculationContext();
+        float width = calculateContentWidth(calculationContext);
+        float height = calculateContentHeight(calculationContext);
         return Dimension.of(width, height);
     }
 
-    void render(PDDocument document, PDPageContentStream contentStream);
+    void render(RenderingContext renderingContext);
 
     default Point convertPointToPdfCoordinates(Point point) {
         if (this instanceof ChildElement) {

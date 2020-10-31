@@ -6,14 +6,15 @@ import com.github.vkuzel.simplepdflayout.property.Point;
 import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
-import org.apache.pdfbox.pdmodel.PDDocument;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.*;
 
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.HEIGHT;
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
@@ -248,15 +249,15 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
-        backgroundRenderer.render(contentStream);
-        borderRenderer.render(contentStream);
-        renderText(contentStream);
+    public void render(RenderingContext renderingContext) {
+        backgroundRenderer.render(renderingContext);
+        borderRenderer.render(renderingContext);
+        renderText(renderingContext);
     }
 
-    private void renderText(PDPageContentStream contentStream) {
+    private void renderText(RenderingContext renderingContext) {
         Point contentTopLeft = calculateContentTopLeft();
-        float width = calculateContentWidth(new LinkedHashSet<>());
+        float width = calculateContentWidth(renderingContext.getCalculationContext());
         List<String> lines = getLines();
 
         try {
@@ -282,6 +283,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
                 Point textBottomLeft = Point.of(tx, ty);
                 Point pdfTextBottomLeft = parentElement.convertPointToPdfCoordinates(textBottomLeft);
 
+                PDPageContentStream contentStream = renderingContext.getContentStream();
                 contentStream.beginText();
                 contentStream.setFont(font.getPdFont(), fontSize);
                 contentStream.setNonStrokingColor(color);
@@ -344,50 +346,49 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
-        return xPositionCalculator.calculate(calculatorPath);
+    public float calculateX(CalculationContext calculationContext) {
+        return xPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
-        return yPositionCalculator.calculate(calculatorPath);
+    public float calculateY(CalculationContext calculationContext) {
+        return yPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return xContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return xContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return yContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return yContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return widthDimensionCalculator.calculate(calculatorPath);
+    public float calculateWidth(CalculationContext calculationContext) {
+        return widthDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return heightDimensionCalculator.calculate(calculatorPath);
+    public float calculateHeight(CalculationContext calculationContext) {
+        return heightDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return widthContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return widthContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return heightContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return heightContentDimensionCalculator.calculate(calculationContext);
     }
 
     private class TextWidthDimensionCalculator implements DimensionCalculator {
 
         @Override
-        public float calculate(Set<Calculator> calculatorPath) {
-            validatePath(calculatorPath);
+        public float calculate(CalculationContext calculationContext) {
             float width = 0;
             for (String line : Text.this.getLines()) {
                 float lineWidth = Text.this.calculateTextWidth(line);

@@ -5,13 +5,11 @@ import com.github.vkuzel.simplepdflayout.property.*;
 import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
 import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
 import java.awt.*;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -225,50 +223,50 @@ public final class Box implements ParentElement<Box>, ChildElement<Box>, Element
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
-        backgroundRenderer.render(contentStream);
-        borderRenderer.render(contentStream);
-        childrenRenderer.render(document, contentStream);
+    public void render(RenderingContext renderingContext) {
+        backgroundRenderer.render(renderingContext);
+        borderRenderer.render(renderingContext);
+        childrenRenderer.render(renderingContext);
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
-        return xPositionCalculator.calculate(calculatorPath);
+    public float calculateX(CalculationContext calculationContext) {
+        return xPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
-        return yPositionCalculator.calculate(calculatorPath);
+    public float calculateY(CalculationContext calculationContext) {
+        return yPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
-        return xContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentX(CalculationContext calculationContext) {
+        return xContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
-        return yContentPositionCalculator.calculate(calculatorPath);
+    public float calculateContentY(CalculationContext calculationContext) {
+        return yContentPositionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
-        return widthDimensionCalculator.calculate(calculatorPath);
+    public float calculateWidth(CalculationContext calculationContext) {
+        return widthDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
-        return heightDimensionCalculator.calculate(calculatorPath);
+    public float calculateHeight(CalculationContext calculationContext) {
+        return heightDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
-        return widthContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return widthContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
-        return heightContentDimensionCalculator.calculate(calculatorPath);
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return heightContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override

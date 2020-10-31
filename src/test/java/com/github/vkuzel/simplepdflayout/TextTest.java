@@ -1,8 +1,7 @@
 package com.github.vkuzel.simplepdflayout;
 
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -21,7 +20,7 @@ public class TextTest {
                 .setLineMaxWidth(maxWidth);
 
         // when
-        float width = text.calculateWidth(new HashSet<>());
+        float width = text.calculateWidth(new CalculationContext());
 
         // then
         assertTrue(width <= maxWidth);

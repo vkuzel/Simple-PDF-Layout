@@ -2,8 +2,6 @@ package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.ParentElement;
 
-import java.util.Set;
-
 public final class PercentOfParentContentDimensionCalculator implements DimensionCalculator {
 
     private final ParentElement<?> parentElement;
@@ -17,15 +15,18 @@ public final class PercentOfParentContentDimensionCalculator implements Dimensio
     }
 
     @Override
-    public float calculate(Set<Calculator> calculatorPath) {
-        validatePath(calculatorPath);
+    public float calculate(CalculationContext calculationContext) {
+        return calculationContext.compute(this, this::calculateInternal);
+    }
+
+    private float calculateInternal(CalculationContext calculationContext) {
         float parentContentDimension;
         switch (measurement) {
             case WIDTH:
-                parentContentDimension = parentElement.calculateContentWidth(calculatorPath);
+                parentContentDimension = parentElement.calculateContentWidth(calculationContext);
                 break;
             case HEIGHT:
-                parentContentDimension = parentElement.calculateContentHeight(calculatorPath);
+                parentContentDimension = parentElement.calculateContentHeight(calculationContext);
                 break;
             default:
                 throw new IllegalStateException("Unsupported measurement " + measurement);

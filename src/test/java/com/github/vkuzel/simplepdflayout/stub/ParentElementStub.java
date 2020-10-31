@@ -2,12 +2,10 @@ package com.github.vkuzel.simplepdflayout.stub;
 
 import com.github.vkuzel.simplepdflayout.ChildElement;
 import com.github.vkuzel.simplepdflayout.ParentElement;
-import com.github.vkuzel.simplepdflayout.calculator.Calculator;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -49,47 +47,47 @@ public class ParentElementStub implements ParentElement<ParentElementStub> {
     }
 
     @Override
-    public float calculateX(Set<Calculator> calculatorPath) {
+    public float calculateX(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateY(Set<Calculator> calculatorPath) {
+    public float calculateY(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateWidth(Set<Calculator> calculatorPath) {
+    public float calculateWidth(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateHeight(Set<Calculator> calculatorPath) {
+    public float calculateHeight(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateContentX(Set<Calculator> calculatorPath) {
+    public float calculateContentX(CalculationContext calculationContext) {
         return contentX;
     }
 
     @Override
-    public float calculateContentY(Set<Calculator> calculatorPath) {
+    public float calculateContentY(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateContentWidth(Set<Calculator> calculatorPath) {
+    public float calculateContentWidth(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public float calculateContentHeight(Set<Calculator> calculatorPath) {
+    public float calculateContentHeight(CalculationContext calculationContext) {
         return 0;
     }
 
     @Override
-    public void render(PDDocument document, PDPageContentStream contentStream) {
+    public void render(RenderingContext renderingContext) {
 
     }
 
