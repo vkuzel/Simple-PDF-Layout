@@ -20,6 +20,7 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
+import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
 
 public final class Text implements ChildElement<Text>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
@@ -71,7 +72,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
 
         setTopLeft(0, 0);
         setWidthOfText();
-        setHeight(lineHeight);
+        setHeightOfText();
     }
 
     public Text setTopLeft(float x, float y) {
@@ -132,6 +133,11 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
 
     public Text setHeightPercent(float heightPercent) {
         heightDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, HEIGHT, heightPercent);
+        return this;
+    }
+
+    public Text setHeightOfText() {
+        heightDimensionCalculator = new TextHeightDimensionCalculator();
         return this;
     }
 
@@ -396,7 +402,28 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
                     width = lineWidth;
                 }
             }
+            width += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
+            width += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getRight);
+            width += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getLeft().getWidth());
+            width += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getRight().getWidth());
+            width += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
+            width += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
             return width;
+        }
+    }
+
+    private class TextHeightDimensionCalculator implements DimensionCalculator {
+
+        @Override
+        public float calculate(CalculationContext calculationContext) {
+            float height = getLines().size() * lineHeight;
+            height += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
+            height += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getBottom);
+            height += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getTop().getWidth());
+            height += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getBottom().getWidth());
+            height += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getTop);
+            height += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getBottom);
+            return height;
         }
     }
 }
