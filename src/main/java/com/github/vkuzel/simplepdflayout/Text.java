@@ -54,7 +54,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     private String linesSplitRegex = "\\r?\\n";
     private float firstLineLeftOffset = 0;
     private Float lineMaxWidth = null;
-    private String lineWrapRegex = " ";
+    private String lineWrapString = " ";
     private float lineHeight = 11.65f;
     private Alignment alignment = Alignment.LEFT;
     private Color color = Color.BLACK;
@@ -324,18 +324,22 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
             return Collections.singletonList(text);
         }
 
-        String[] tokens = text.split(lineWrapRegex);
+        List<String> tokens = tokenize(text);
         String buffer = "";
         List<String> lines = new ArrayList<>();
         boolean firstWrapLine = firstLine;
 
         for (String token : tokens) {
-            String potentialBuffer = buffer + (buffer.isEmpty() ? "" : " ") + token;
+            String potentialBuffer = buffer + token;
             float bufferWidth = calculateTextWidth(potentialBuffer);
             float leftOffset = firstWrapLine && alignment == Alignment.LEFT ? firstLineLeftOffset : 0;
             if (bufferWidth + leftOffset > lineMaxWidth) {
                 lines.add(buffer);
-                buffer = token;
+                if (!token.equals(lineWrapString)) {
+                    buffer = token;
+                } else {
+                    buffer = "";
+                }
                 firstWrapLine = false;
             } else {
                 buffer = potentialBuffer;
@@ -346,6 +350,22 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
         }
 
         return lines;
+    }
+
+    private List<String> tokenize(String text) {
+        List<String> tokens = new ArrayList<>();
+        int index, previousIndex = 0;
+        while ((index = text.indexOf(lineWrapString, previousIndex)) >= 0) {
+            if (previousIndex < index) {
+                tokens.add(text.substring(previousIndex, index));
+            }
+            tokens.add(lineWrapString);
+            previousIndex = index + lineWrapString.length();
+        }
+        if (previousIndex < text.length()) {
+            tokens.add(text.substring(previousIndex));
+        }
+        return tokens;
     }
 
     private float calculateTextWidth(String text) {
