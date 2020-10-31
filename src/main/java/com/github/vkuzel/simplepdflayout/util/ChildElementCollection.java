@@ -52,7 +52,7 @@ public final class ChildElementCollection<P extends ParentElement<P>> {
         int index = children.indexOf(childElement);
         if (index < 0) {
             throw new IllegalStateException("Element " + childElement + " is not child of this element " + this);
-        } else if (index < children.size()) {
+        } else if (index < children.size() - 1) {
             return children.get(index + 1);
         } else {
             return null;

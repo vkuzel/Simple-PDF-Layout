@@ -2,10 +2,14 @@ package com.github.vkuzel.simplepdflayout;
 
 import com.github.vkuzel.simplepdflayout.property.Dimension;
 import com.github.vkuzel.simplepdflayout.property.Point;
+import com.github.vkuzel.simplepdflayout.property.YPosition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BoxTest {
 
@@ -87,5 +91,20 @@ public class BoxTest {
         // then
         assertEquals(PAGE_PADDING, topLeft.getX(), 0.001);
         assertEquals(PAGE_PADDING, topLeft.getY(), 0.001);
+    }
+
+    @Test
+    void cycleInDependenciesShouldThrowException() {
+        // given
+        AtomicReference<Box> first = new AtomicReference<>();
+        AtomicReference<Box> second = new AtomicReference<>();
+        box
+                .addBox(first::set)
+                .addBox(second::set);
+        first.get().setVerticalPosition(YPosition.TO_TOP, first.get().getNext());
+        second.get().setVerticalPosition(YPosition.TO_BOTTOM, second.get().getPrevious());
+
+        // when, then
+        assertThrows(Throwable.class, () -> box.calculateContentDimension());
     }
 }
