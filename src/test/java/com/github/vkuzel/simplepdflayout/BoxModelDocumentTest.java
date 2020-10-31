@@ -24,6 +24,7 @@ public class BoxModelDocumentTest {
                         .setBorder(Border.of(BORDER_TOP_BOTTOM, BORDER_LEFT_RIGHT, BORDER_TOP_BOTTOM, BORDER_LEFT_RIGHT))
                         .setPadding(Padding.of(25, 50, 25, 50))
                         .addBox(box1 -> box1
+                                .setDimensionPercent(100, 100)
                                 .setBackgroundColor(PINK))
                 )
                 .addBox(this::createTopLeftPointer)
