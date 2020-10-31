@@ -315,7 +315,12 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     }
 
     private List<String> wrapLine(String text, boolean firstLine) {
-        if (lineMaxWidth == null || calculateTextWidth(text) < lineMaxWidth) {
+        float textWidth = calculateTextWidth(text);
+        if (firstLine) {
+            textWidth += firstLineLeftOffset;
+        }
+
+        if (lineMaxWidth == null || textWidth < lineMaxWidth) {
             return Collections.singletonList(text);
         }
 
