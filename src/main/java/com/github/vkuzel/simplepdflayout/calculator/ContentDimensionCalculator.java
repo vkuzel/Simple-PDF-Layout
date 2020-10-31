@@ -1,14 +1,10 @@
 package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.Element;
-import com.github.vkuzel.simplepdflayout.ElementWithBorder;
-import com.github.vkuzel.simplepdflayout.ElementWithMargin;
-import com.github.vkuzel.simplepdflayout.ElementWithPadding;
 import com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement;
-import com.github.vkuzel.simplepdflayout.property.Margin;
-import com.github.vkuzel.simplepdflayout.property.Padding;
 
-import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumHorizontalMarginBorderPadding;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumVerticalMarginBorderPadding;
 
 public final class ContentDimensionCalculator implements Calculator {
 
@@ -30,21 +26,11 @@ public final class ContentDimensionCalculator implements Calculator {
         switch (measurement) {
             case WIDTH:
                 dimension = element.calculateWidth(calculationContext);
-                dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
-                dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getRight);
-                dimension -= getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getLeft().getWidth());
-                dimension -= getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getRight().getWidth());
-                dimension -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
-                dimension -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
+                dimension -= sumHorizontalMarginBorderPadding(element);
                 break;
             case HEIGHT:
                 dimension = element.calculateHeight(calculationContext);
-                dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
-                dimension -= getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getBottom);
-                dimension -= getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getTop().getWidth());
-                dimension -= getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getBottom().getWidth());
-                dimension -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getTop);
-                dimension -= getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getBottom);
+                dimension -= sumVerticalMarginBorderPadding(element);
                 break;
             default:
                 throw new IllegalStateException("Unsupported measurement " + measurement);

@@ -3,6 +3,9 @@ package com.github.vkuzel.simplepdflayout.calculator;
 import com.github.vkuzel.simplepdflayout.ChildElement;
 import com.github.vkuzel.simplepdflayout.ParentElement;
 
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumHorizontalMarginBorderPadding;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumVerticalMarginBorderPadding;
+
 public final class SizeOfChildrenDimensionCalculator implements DimensionCalculator {
 
     private static final float MAX_VALUE = 1_000_000;
@@ -31,7 +34,7 @@ public final class SizeOfChildrenDimensionCalculator implements DimensionCalcula
                     leftX = Math.min(leftX, x);
                     rightX = Math.max(rightX, x + child.calculateWidth(calculationContext));
                 }
-                return Math.max(rightX - leftX, 0);
+                return Math.max(rightX - leftX, 0) + sumHorizontalMarginBorderPadding(element);
             case HEIGHT:
                 float topY = MAX_VALUE;
                 float bottomY = MIN_VALUE;
@@ -40,7 +43,7 @@ public final class SizeOfChildrenDimensionCalculator implements DimensionCalcula
                     topY = Math.min(topY, y);
                     bottomY = Math.max(bottomY, y + child.calculateHeight(calculationContext));
                 }
-                return Math.max(bottomY - topY, 0);
+                return Math.max(bottomY - topY, 0) + sumVerticalMarginBorderPadding(element);
             default:
                 throw new IllegalStateException("Unsupported measurement " + measurement);
         }

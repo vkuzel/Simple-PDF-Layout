@@ -1,14 +1,10 @@
 package com.github.vkuzel.simplepdflayout.calculator;
 
 import com.github.vkuzel.simplepdflayout.Element;
-import com.github.vkuzel.simplepdflayout.ElementWithBorder;
-import com.github.vkuzel.simplepdflayout.ElementWithMargin;
-import com.github.vkuzel.simplepdflayout.ElementWithPadding;
 import com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis;
-import com.github.vkuzel.simplepdflayout.property.Margin;
-import com.github.vkuzel.simplepdflayout.property.Padding;
 
-import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumLeftMarginBorderPadding;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumTopMarginBorderPadding;
 
 public final class ContentPositionCalculator implements Calculator {
 
@@ -30,15 +26,11 @@ public final class ContentPositionCalculator implements Calculator {
         switch (axis) {
             case X:
                 position = element.calculateX(calculationContext);
-                position += getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
-                position += getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getLeft().getWidth());
-                position += getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getLeft);
+                position += sumLeftMarginBorderPadding(element);
                 break;
             case Y:
                 position = element.calculateY(calculationContext);
-                position += getValue(element, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
-                position += getValue(element, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getTop().getWidth());
-                position += getValue(element, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getTop);
+                position += sumTopMarginBorderPadding(element);
                 break;
             default:
                 throw new IllegalStateException("Unsupported axis " + axis);

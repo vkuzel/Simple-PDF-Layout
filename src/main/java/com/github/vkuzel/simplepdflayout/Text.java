@@ -20,7 +20,8 @@ import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.M
 import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
-import static com.github.vkuzel.simplepdflayout.util.Utils.getValue;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumHorizontalMarginBorderPadding;
+import static com.github.vkuzel.simplepdflayout.util.Utils.sumVerticalMarginBorderPadding;
 
 public final class Text implements ChildElement<Text>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
@@ -402,12 +403,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
                     width = lineWidth;
                 }
             }
-            width += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getLeft);
-            width += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getRight);
-            width += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getLeft().getWidth());
-            width += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getRight().getWidth());
-            width += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
-            width += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getRight);
+            width += sumHorizontalMarginBorderPadding(Text.this);
             return width;
         }
     }
@@ -417,12 +413,7 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
         @Override
         public float calculate(CalculationContext calculationContext) {
             float height = getLines().size() * lineHeight;
-            height += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getTop);
-            height += getValue(Text.this, ElementWithMargin.class, ElementWithMargin::getMargin, Margin::getBottom);
-            height += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getTop().getWidth());
-            height += getValue(Text.this, ElementWithBorder.class, ElementWithBorder::getBorder, border -> border.getBottom().getWidth());
-            height += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getTop);
-            height += getValue(Text.this, ElementWithPadding.class, ElementWithPadding::getPadding, Padding::getBottom);
+            height += sumVerticalMarginBorderPadding(Text.this);
             return height;
         }
     }
