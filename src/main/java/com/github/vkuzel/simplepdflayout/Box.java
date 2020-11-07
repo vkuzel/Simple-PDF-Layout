@@ -1,429 +1,291 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import com.github.vkuzel.simplepdflayout.calculator.*;
+import com.github.vkuzel.simplepdflayout.property.*;
+import com.github.vkuzel.simplepdflayout.renderer.BackgroundRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.BorderRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.ChildrenRenderer;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
+import com.github.vkuzel.simplepdflayout.util.ChildElementCollection;
 
-//import java.awt.*;
-import java.awt.Color;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
+import java.awt.*;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public class Box<T extends Box> implements ParentElement<T>, ChildElement {
+import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.HEIGHT;
+import static com.github.vkuzel.simplepdflayout.calculator.DimensionCalculator.Measurement.WIDTH;
+import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.X;
+import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
 
-    protected ParentElement parent;
-    protected final List<ChildElement> children = new ArrayList<>();
+public final class Box implements ParentElement<Box>, ChildElement<Box>, ElementWithMargin, ElementWithBorder, ElementWithPadding, ElementWithBackground {
 
-    protected float x = 0;
-    protected Float xPercent;
-    protected float y = 0;
-    protected Float yPercent;
-    protected Float width;
-    protected Float widthPercent;
-    protected Float height;
-    protected Float heightPercent;
+    private final ParentElement<?> parentElement;
+    private final ChildElementCollection<Box> children;
 
-    protected float paddingTop = 0;
-    protected float paddingRight = 0;
-    protected float paddingBottom = 0;
-    protected float paddingLeft = 0;
+    private final ContentPositionCalculator xContentPositionCalculator;
+    private final ContentPositionCalculator yContentPositionCalculator;
+    private final ContentDimensionCalculator widthContentDimensionCalculator;
+    private final ContentDimensionCalculator heightContentDimensionCalculator;
 
-    protected Line borderTop = new Line();
-    protected Line borderRight = new Line();
-    protected Line borderBottom = new Line();
-    protected Line borderLeft = new Line();
+    private final BorderRenderer borderRenderer;
+    private final BackgroundRenderer backgroundRenderer;
+    private final ChildrenRenderer childrenRenderer;
 
-    protected float marginTop = 0;
-    protected float marginRight = 0;
-    protected float marginLeft = 0;
-    protected float marginBottom = 0;
+    private PositionCalculator xPositionCalculator;
+    private PositionCalculator yPositionCalculator;
+    private DimensionCalculator widthDimensionCalculator;
+    private DimensionCalculator heightDimensionCalculator;
 
-    protected Color backgroundColor;
+    private Margin margin = null;
+    private Border border = null;
+    private Padding padding = null;
+    private Color backgroundColor;
 
-    @SuppressWarnings("unchecked")
-    protected T getThis() {
-        return (T) this;
+    Box(ParentElement<?> parentElement) {
+        this.parentElement = parentElement;
+        this.children = new ChildElementCollection<>(this);
+
+        this.xContentPositionCalculator = new ContentPositionCalculator(this, X);
+        this.yContentPositionCalculator = new ContentPositionCalculator(this, Y);
+        this.widthContentDimensionCalculator = new ContentDimensionCalculator(this, WIDTH);
+        this.heightContentDimensionCalculator = new ContentDimensionCalculator(this, HEIGHT);
+
+        this.borderRenderer = new BorderRenderer(this);
+        this.backgroundRenderer = new BackgroundRenderer(this);
+        this.childrenRenderer = new ChildrenRenderer(this);
+
+        setTopLeft(0, 0);
+        setWidthPercent(100);
+        setHeightOfChildren();
     }
 
-    public T addChild(ChildElement child) {
-        return addChildren(Collections.singleton(child));
+    public Box setTopLeft(float x, float y) {
+        return setX(x).setY(y);
+    }
+
+    public Box setTopLeftPercent(float xPercent, float yPercent) {
+        return setXPercent(xPercent).setYPercent(yPercent);
+    }
+
+    public Box setX(float x) {
+        xPositionCalculator = new FixedPositionCalculator(parentElement, X, x);
+        return this;
+    }
+
+    public Box setXPercent(float xPercent) {
+        xPositionCalculator = new PercentOfParentPositionCalculator(parentElement, X, xPercent);
+        return this;
+    }
+
+    public Box setY(float y) {
+        yPositionCalculator = new FixedPositionCalculator(parentElement, Y, y);
+        return this;
+    }
+
+    public Box setYPercent(float yPercent) {
+        yPositionCalculator = new PercentOfParentPositionCalculator(parentElement, Y, yPercent);
+        return this;
+    }
+
+    public Box setDimension(float width, float height) {
+        return setWidth(width).setHeight(height);
+    }
+
+    public Box setDimensionPercent(float widthPercent, float heightPercent) {
+        return setWidthPercent(widthPercent).setHeightPercent(heightPercent);
+    }
+
+    public Box setDimensionOfChildren() {
+        return setWidthOfChildren().setHeightOfChildren();
+    }
+
+    public Box setWidth(float width) {
+        widthDimensionCalculator = new FixedDimensionCalculator(width);
+        return this;
+    }
+
+    public Box setWidthPercent(float widthPercent) {
+        widthDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, WIDTH, widthPercent);
+        return this;
+    }
+
+    public Box setWidthOfChildren() {
+        widthDimensionCalculator = new SizeOfChildrenDimensionCalculator(this, WIDTH);
+        return this;
+    }
+
+    public Box setHeight(float height) {
+        heightDimensionCalculator = new FixedDimensionCalculator(height);
+        return this;
+    }
+
+    public Box setHeightPercent(float heightPercent) {
+        heightDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, HEIGHT, heightPercent);
+        return this;
+    }
+
+    public Box setHeightOfChildren() {
+        heightDimensionCalculator = new SizeOfChildrenDimensionCalculator(this, HEIGHT);
+        return this;
+    }
+
+    public Box setHorizontalPosition(XPosition xPosition, Element positionElement) {
+        xPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, xPosition, null, positionElement);
+        return this;
+    }
+
+    public Box setVerticalPosition(YPosition yPosition, Element positionElement) {
+        yPositionCalculator = new RelativeToElementPositionCalculator(parentElement, this, null, yPosition, positionElement);
+        return this;
+    }
+
+    public Box setMargin(float margin) {
+        return setMargin(Margin.of(margin));
+    }
+
+    public Box setMargin(Margin margin) {
+        this.margin = margin;
+        return this;
     }
 
     @Override
-    public T addChildren(Collection<ChildElement> children) {
-        for (ChildElement child : children) {
-            if (child.getParent() != null) {
-                throw new IllegalArgumentException("Child " + child.getClass().getSimpleName() + " already has a parent, cannot be put into another!");
-            }
-            child.setParent(this);
-            this.children.add(child);
-        }
-        return getThis();
+    public Margin getMargin() {
+        return margin;
+    }
+
+    public Box setBorder(Line line) {
+        return setBorder(Border.of(line));
+    }
+
+    public Box setBorder(Border border) {
+        this.border = border;
+        return this;
     }
 
     @Override
-    public List<ChildElement> getChildren() {
-        return children;
+    public Border getBorder() {
+        return border;
     }
 
-    public T setParent(ParentElement parent) {
-        this.parent = parent;
-        return getThis();
+    public Box setPadding(float padding) {
+        return setPadding(Padding.of(padding));
     }
 
-    public ParentElement getParent() {
-        return this.parent;
+    public Box setPadding(Padding padding) {
+        this.padding = padding;
+        return this;
     }
 
-    public T setTopLeft(float x, float y) {
-        setX(x).setY(y);
-        return getThis();
+    @Override
+    public Padding getPadding() {
+        return padding;
     }
 
-    public T setTopLeftPercent(float xPercent, float yPercent) {
-        setXPercent(xPercent).setYPercent(yPercent);
-        return getThis();
-    }
-
-    public T setX(float x) {
-        this.x = x;
-        this.xPercent = null;
-        return getThis();
-    }
-
-    public T setXPercent(float xPercent) {
-        this.xPercent = xPercent;
-        return getThis();
-    }
-
-    public T setY(float y) {
-        this.y = y;
-        this.yPercent = null;
-        return getThis();
-    }
-
-    public T setYPercent(float yPercent) {
-        this.yPercent = yPercent;
-        return getThis();
-    }
-
-    public T setDimension(float width, float height) {
-        setWidth(width).setHeight(height);
-        return getThis();
-    }
-
-    public T setDimensionPercent(float widthPercent, float heightPercent) {
-        setWidthPercent(widthPercent).setHeightPercent(heightPercent);
-        return getThis();
-    }
-
-    public T setWidth(float width) {
-        this.width = width;
-        this.widthPercent = null;
-        return getThis();
-    }
-
-    public T setWidthPercent(float widthPercent) {
-        this.widthPercent = widthPercent;
-        return getThis();
-    }
-
-    public T setHeight(float height) {
-        this.height = height;
-        this.heightPercent = null;
-        return getThis();
-    }
-
-    public T setHeightPercent(float heightPercent) {
-        this.heightPercent = heightPercent;
-        return getThis();
-    }
-
-    public T setMargin(float margin) {
-        this.marginLeft = this.marginBottom = this.marginRight = this.marginTop = margin;
-        return getThis();
-    }
-
-    public T setMarginTop(float marginTop) {
-        this.marginTop = marginTop;
-        return getThis();
-    }
-
-    public T setMarginRight(float marginRight) {
-        this.marginRight = marginRight;
-        return getThis();
-    }
-
-    public T setMarginBottom(float marginBottom) {
-        this.marginBottom = marginBottom;
-        return getThis();
-    }
-
-    public T setMarginLeft(float marginLeft) {
-        this.marginLeft = marginLeft;
-        return getThis();
-    }
-
-    public T setBorder(Line line) {
-        validateNotNull(line);
-        this.borderTop = line;
-        this.borderRight = line;
-        this.borderBottom = line;
-        this.borderLeft = line;
-        return getThis();
-    }
-
-    public T setBorderTop(Line line) {
-        validateNotNull(line);
-        this.borderTop = line;
-        return getThis();
-    }
-
-    public T setBorderRight(Line line) {
-        validateNotNull(line);
-        this.borderRight = line;
-        return getThis();
-    }
-
-    public T setBorderBottom(Line line) {
-        validateNotNull(line);
-        this.borderBottom = line;
-        return getThis();
-    }
-
-    public T setBorderLeft(Line line) {
-        validateNotNull(line);
-        this.borderLeft = line;
-        return getThis();
-    }
-
-    public T setPadding(float padding) {
-        this.paddingLeft = this.paddingBottom = this.paddingRight = this.paddingTop = padding;
-        return getThis();
-    }
-
-    public T setPaddingTop(float paddingTop) {
-        this.paddingTop = paddingTop;
-        return getThis();
-    }
-
-    public T setPaddingRight(float paddingRight) {
-        this.paddingRight = paddingRight;
-        return getThis();
-    }
-
-    public T setPaddingBottom(float paddingBottom) {
-        this.paddingBottom = paddingBottom;
-        return getThis();
-    }
-
-    public T setPaddingLeft(float paddingLeft) {
-        this.paddingLeft = paddingLeft;
-        return getThis();
-    }
-
-    public T setBackgroundColor(Color backgroundColor) {
+    public Box setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
-        return getThis();
-    }
-
-    public void draw(PDDocument document, PDPageContentStream contentStream) {
-        validateParent();
-        drawBackground(contentStream);
-        drawBorders(contentStream);
-        drawChildren(document, contentStream);
-    }
-
-    protected void drawBackground(PDPageContentStream contentStream) {
-        if (backgroundColor == null) {
-            return;
-        }
-
-        Point topLeft = calculateBackgroundTopLeft();
-        Dimension dimension = calculateBackgroundDimension();
-        Point bottomLeft = new Point(topLeft.getX(), topLeft.getY() + dimension.getHeight());
-        Point pdfBottomLeft = convertPointToPdfCoordinates(bottomLeft);
-
-        try {
-            contentStream.addRect(pdfBottomLeft.getX(), pdfBottomLeft.getY(), dimension.getWidth(), dimension.getHeight());
-            contentStream.setNonStrokingColor(backgroundColor);
-            contentStream.fill();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    protected void drawBorders(PDPageContentStream contentStream) {
-        Point topLeft = calculateBorderTopLeft();
-        Point bottomRight = calculateBorderBottomRight();
-        Point topRight = new Point(bottomRight.getX(), topLeft.getY());
-        Point bottomLeft = new Point(topLeft.getX(), bottomRight.getY());
-
-        if (borderTop.getWidth() > 0) {
-            Point topStart = new Point(topLeft.getX() - borderLeft.getWidth() / 2, topLeft.getY());
-            Point topEnd = new Point(topRight.getX() + borderRight.getWidth() / 2, topRight.getY());
-            drawLine(borderTop, topStart, topEnd, contentStream);
-        }
-        if (borderRight.getWidth() > 0) {
-            Point rightStart = new Point(topRight.getX(), topRight.getY() - borderTop.getWidth() / 2);
-            Point rightEnd = new Point(bottomRight.getX(), bottomRight.getY() + borderBottom.getWidth() / 2);
-            drawLine(borderRight, rightStart, rightEnd, contentStream);
-        }
-        if (borderBottom.getWidth() > 0) {
-            Point bottomStart = new Point(bottomRight.getX() + borderRight.getWidth() / 2, bottomRight.getY());
-            Point bottomEnd = new Point(bottomLeft.getX() - borderLeft.getWidth() / 2, bottomLeft.getY());
-            drawLine(borderBottom, bottomStart, bottomEnd, contentStream);
-        }
-        if (borderLeft.getWidth() > 0) {
-            Point leftStart = new Point(bottomLeft.getX(), bottomLeft.getY() + borderBottom.getWidth() / 2);
-            Point leftEnd = new Point(topLeft.getX(), topLeft.getY() - borderTop.getWidth() / 2);
-            drawLine(borderLeft, leftStart, leftEnd, contentStream);
-        }
-    }
-
-    protected void drawLine(Line line, Point start, Point end, PDPageContentStream contentStream) {
-        Point pdfStart = convertPointToPdfCoordinates(start);
-        Point pdfEnd = convertPointToPdfCoordinates(end);
-
-        try {
-            contentStream.setLineWidth(line.getWidth());
-            contentStream.setLineDashPattern(line.calculatePattern(), 0);
-            contentStream.setStrokingColor(line.getColor());
-            contentStream.moveTo(pdfStart.getX(), pdfStart.getY());
-            contentStream.lineTo(pdfEnd.getX(), pdfEnd.getY());
-            contentStream.stroke();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-    }
-
-    protected void drawChildren(PDDocument document, PDPageContentStream contentStream) {
-        for (ChildElement child : children) {
-            child.draw(document, contentStream);
-        }
-    }
-
-    protected Point calculateTopLeft() {
-        validateParent();
-        Point parentOffset = parent.calculateContentTopLeft();
-        Dimension parentContentDimension = parent.calculateContentDimension();
-        float rx, ry;
-
-        if (xPercent != null) {
-            rx = parentOffset.getX() + xPercent * parentContentDimension.getWidth() / 100;
-        } else {
-            rx = parentOffset.getX() + x;
-        }
-
-        if (yPercent != null) {
-            ry = parentOffset.getY() + yPercent * parentContentDimension.getHeight() / 100;
-        } else {
-            ry = parentOffset.getY() + y;
-        }
-
-        return new Point(rx, ry);
-    }
-
-    protected Dimension calculateDimension() {
-        validateParent();
-        Dimension parentContentDimension = parent.calculateContentDimension();
-        float rWidth, rHeight;
-
-        if (widthPercent != null) {
-            rWidth = widthPercent * parentContentDimension.getWidth() / 100;
-        } else if (width != null) {
-            rWidth = width;
-        } else {
-            rWidth = parentContentDimension.getWidth();
-        }
-
-        if (heightPercent != null) {
-            rHeight = heightPercent * parentContentDimension.getHeight() / 100;
-        } else if (height != null) {
-            rHeight = height;
-        } else {
-            rHeight = parentContentDimension.getHeight();
-        }
-
-        return new Dimension(rWidth, rHeight);
-    }
-
-    public Point calculateContentTopLeft() {
-        Point topLeft = calculateTopLeft();
-        return new Point(
-                topLeft.getX() + marginLeft + borderLeft.getWidth() + paddingRight,
-                topLeft.getY() + marginTop + borderTop.getWidth() + paddingTop
-        );
-    }
-
-    public Dimension calculateContentDimension() {
-        float horizontalBorderWidth = borderLeft.getWidth() + borderRight.getWidth();
-        float verticalBorderWidth = borderTop.getWidth() + borderBottom.getWidth();
-        Dimension dimension = calculateDimension();
-        return new Dimension(
-                dimension.getWidth() - marginLeft - marginRight - paddingLeft - paddingRight - horizontalBorderWidth,
-                dimension.getHeight() - marginTop - marginBottom - paddingTop - paddingBottom - verticalBorderWidth
-        );
-    }
-
-    protected Point calculateBackgroundTopLeft() {
-        Point contentTopLeft = calculateContentTopLeft();
-        return new Point(
-                contentTopLeft.getX() - paddingLeft,
-                contentTopLeft.getY() - paddingTop
-        );
-    }
-
-    protected Dimension calculateBackgroundDimension() {
-        Dimension contentDimension = calculateContentDimension();
-        return new Dimension(
-                contentDimension.getWidth() + paddingLeft + paddingRight,
-                contentDimension.getHeight() + paddingTop + paddingBottom
-        );
-    }
-
-    protected Point calculateBorderTopLeft() {
-        Point topLeft = calculateTopLeft();
-        return new Point(
-                topLeft.getX() + marginLeft + borderLeft.getWidth() / 2,
-                topLeft.getY() + marginTop + borderTop.getWidth() / 2
-        );
-    }
-
-    protected Point calculateBorderBottomRight() {
-        Point topLeft = calculateTopLeft();
-        Dimension dimension = calculateDimension();
-        return new Point(
-                topLeft.getX() + dimension.getWidth() - marginRight - borderRight.getWidth() / 2,
-                topLeft.getY() + dimension.getHeight() - marginBottom - borderBottom.getWidth() / 2
-        );
+        return this;
     }
 
     @Override
-    public Point convertPointToPdfCoordinates(Point point) {
-        return parent.convertPointToPdfCoordinates(point);
+    public Color getBackgroundColor() {
+        return backgroundColor;
     }
 
-    protected void validateParent() {
-        if (parent == null) {
-            throw new IllegalStateException("Parent not found for element " + this.getClass().getSimpleName());
+    @Override
+    public <C extends ChildElement<C>> Box addChild(Function<ParentElement<?>, C> childFactory, Consumer<C> childConfigurer) {
+        return children.addChild(childFactory, childConfigurer);
+    }
+
+    @Override
+    public Box removeChild(ChildElement<?> childElement) {
+        return children.removeChild(childElement);
+    }
+
+    @Override
+    public List<ChildElement<?>> getChildren() {
+        return children.getChildren();
+    }
+
+    @Override
+    public ChildElement<?> getPreviousChildTo(ChildElement<?> childElement) {
+        return children.getPreviousChildTo(childElement);
+    }
+
+    @Override
+    public ChildElement<?> getNextChildTo(ChildElement<?> childElement) {
+        return children.getNextChildTo(childElement);
+    }
+
+    @Override
+    public ParentElement<?> getParent() {
+        return parentElement;
+    }
+
+    @Override
+    public void render(RenderingContext renderingContext) {
+        backgroundRenderer.render(renderingContext);
+        borderRenderer.render(renderingContext);
+        childrenRenderer.render(renderingContext);
+    }
+
+    @Override
+    public float calculateX(CalculationContext calculationContext) {
+        return xPositionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateY(CalculationContext calculationContext) {
+        return yPositionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateContentX(CalculationContext calculationContext) {
+        return xContentPositionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateContentY(CalculationContext calculationContext) {
+        return yContentPositionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateWidth(CalculationContext calculationContext) {
+        return widthDimensionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateHeight(CalculationContext calculationContext) {
+        return heightDimensionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return widthContentDimensionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return heightContentDimensionCalculator.calculate(calculationContext);
+    }
+
+    @Override
+    public String toString() {
+        return "Box@" + Integer.toHexString(hashCode()) + "{" +
+                "parentElement=" + getClassName(parentElement) +
+                ", children.size=" + children.getChildren().size() +
+                ", xPositionCalculator=" + getClassName(xPositionCalculator) +
+                ", yPositionCalculator=" + getClassName(yPositionCalculator) +
+                ", widthDimensionCalculator=" + getClassName(widthDimensionCalculator) +
+                ", heightDimensionCalculator=" + getClassName(heightDimensionCalculator) +
+                '}';
+    }
+
+    private String getClassName(Object obj) {
+        if (obj != null) {
+            return obj.getClass().getSimpleName();
+        } else {
+            return "";
         }
-    }
-
-    protected void validateNotNull(Object value) {
-        if (value == null) {
-            throw new IllegalArgumentException("Value cannot be null!");
-        }
-    }
-
-    public String toStringCoordinates() {
-        Point topLeft = calculateTopLeft();
-        Dimension dimension = calculateDimension();
-        return "[x, y], [width, height] = " + topLeft + ", " + dimension +
-                ", [pdfX, pdfY], [pdfWidth, pdfHeight] = " + convertPointToPdfCoordinates(topLeft) + ", " + dimension;
     }
 }

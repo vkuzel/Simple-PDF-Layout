@@ -1,92 +1,94 @@
 package com.github.vkuzel.simplepdflayout;
 
-import com.github.vkuzel.simplepdflayout.geometry.Dimension;
-import com.github.vkuzel.simplepdflayout.geometry.Point;
-import com.github.vkuzel.simplepdflayout.geometry.Vector;
-import org.apache.pdfbox.pdmodel.PDDocument;
+import com.github.vkuzel.simplepdflayout.calculator.CalculationContext;
+import com.github.vkuzel.simplepdflayout.property.Line;
+import com.github.vkuzel.simplepdflayout.property.Point;
+import com.github.vkuzel.simplepdflayout.property.Vector;
+import com.github.vkuzel.simplepdflayout.renderer.RenderingContext;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 
-import java.awt.*;
 import java.io.IOException;
 
-public class Arrow<T extends Arrow> implements ChildElement<Arrow> {
+import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
+import static java.awt.Color.RED;
 
-    protected ParentElement parent;
-    protected float startX = 0;
-    protected float startY = 0;
-    protected Float endX;
-    protected Float endY;
-    protected Box startElement;
-    protected boolean startArrow = true;
-    protected boolean endArrow = false;
-    protected Line line = new Line().setWidth(3).setColor(Color.RED);
+public final class Arrow implements ChildElement<Arrow> {
 
-    @SuppressWarnings("unchecked")
-    protected T getThis() {
-        return (T) this;
+    private final ParentElement<?> parentElement;
+
+    private float startX = 0;
+    private float startY = 0;
+    private Float endX;
+    private Float endY;
+    private Element startElement;
+    private boolean startArrow = true;
+    private boolean endArrow = false;
+    private Line line = Line.of(3, SOLID, RED);
+
+    Arrow(ParentElement<?> parentElement) {
+        this.parentElement = parentElement;
     }
 
-    @Override
-    public Arrow setParent(ParentElement parent) {
-        this.parent = parent;
+    public Arrow setStartPoint(Point point) {
+        return setStartPosition(point.getX(), point.getY());
+    }
+
+    public Arrow setStartPosition(float x, float y) {
+        this.startX = x;
+        this.startY = y;
+        return this;
+    }
+
+    public Arrow setEndPoint(Point point) {
+        return setEndPosition(point.getX(), point.getY());
+    }
+
+    public Arrow setEndPosition(float x, float y) {
+        this.endX = x;
+        this.endY = y;
+        return this;
+    }
+
+    public Arrow setStartElement(Element startElement) {
+        this.startElement = startElement;
+        return this;
+    }
+
+    public Arrow setStartArrow(boolean startArrow) {
+        this.startArrow = startArrow;
+        return this;
+    }
+
+    public Arrow setEndArrow(boolean endArrow) {
+        this.endArrow = endArrow;
+        return this;
+    }
+
+    public Arrow setLine(Line line) {
+        this.line = line;
         return this;
     }
 
     @Override
-    public ParentElement getParent() {
-        return parent;
-    }
-
-    public T setStartPoint(Point point) {
-        return setStartPosition(point.getX(), point.getY());
-    }
-
-    public T setStartPosition(float x, float y) {
-        this.startX = x;
-        this.startY = y;
-        return getThis();
-    }
-
-    public T setEndPoint(Point point) {
-        return setEndPosition(point.getX(), point.getY());
-    }
-
-    public T setEndPosition(float x, float y) {
-        this.endX = x;
-        this.endY = y;
-        return getThis();
-    }
-
-    public T setStartElement(Box startElement) {
-        this.startElement = startElement;
-        return getThis();
-    }
-
-    public T setStartArrow(boolean startArrow) {
-        this.startArrow = startArrow;
-        return getThis();
-    }
-
-    public T setEndArrow(boolean endArrow) {
-        this.endArrow = endArrow;
-        return getThis();
-    }
-
-    public T setLine(Line line) {
-        this.line = line;
-        return getThis();
+    public ParentElement<?> getParent() {
+        return parentElement;
     }
 
     @Override
-    public void draw(PDDocument document, PDPageContentStream contentStream) {
+    public void render(RenderingContext renderingContext) {
         try {
-            Point pdfStart = parent.convertPointToPdfCoordinates(calculateStart());
-            Point pdfEnd = parent.convertPointToPdfCoordinates(calculateEnd());
+            PDPageContentStream contentStream = renderingContext.getContentStream();
+            CalculationContext calculationContext = renderingContext.getCalculationContext();
+
+            Point start = Point.of(calculateStartX(calculationContext), calculateStartY(calculationContext));
+            Point end = Point.of(calculateEndX(calculationContext), calculateEndY(calculationContext));
+            Point pdfStart = parentElement.convertPointToPdfCoordinates(start);
+            Point pdfEnd = parentElement.convertPointToPdfCoordinates(end);
             float arrowSize = line.getWidth() * 5.5f;
 
             if (startArrow) {
                 Vector v = Vector.ofLineSegment(pdfStart, pdfEnd).normalize();
-                Point p = new Point(pdfStart.getX() + v.getX() * arrowSize, pdfStart.getY() + v.getY() * arrowSize);
+                Point p = Point.of(pdfStart.getX() + v.getX() * arrowSize, pdfStart.getY() + v.getY() * arrowSize);
 
                 contentStream.setNonStrokingColor(line.getColor());
                 contentStream.moveTo(pdfStart.getX(), pdfStart.getY());
@@ -100,7 +102,7 @@ public class Arrow<T extends Arrow> implements ChildElement<Arrow> {
 
             if (endArrow) {
                 Vector v = Vector.ofLineSegment(pdfEnd, pdfStart).normalize();
-                Point p = new Point(pdfEnd.getX() + v.getX() * arrowSize, pdfEnd.getY() + v.getY() * arrowSize);
+                Point p = Point.of(pdfEnd.getX() + v.getX() * arrowSize, pdfEnd.getY() + v.getY() * arrowSize);
 
                 contentStream.setNonStrokingColor(line.getColor());
                 contentStream.moveTo(pdfEnd.getX(), pdfEnd.getY());
@@ -123,61 +125,109 @@ public class Arrow<T extends Arrow> implements ChildElement<Arrow> {
         }
     }
 
-    protected Point calculateStart() {
+    private float calculateStartX(CalculationContext calculationContext) {
         if (startElement != null) {
-            Point topLeft = startElement.calculateTopLeft();
-            Dimension dimension = startElement.calculateDimension();
-            return new Point(topLeft.getX() + dimension.getWidth(), topLeft.getY() + dimension.getHeight());
+            float x = startElement.calculateX(calculationContext);
+            float width = startElement.calculateWidth(calculationContext);
+            return x + width;
         } else {
-            return new Point(startX, startY);
+            return startX;
         }
     }
 
-    protected Point calculateEnd() {
-        Point start = calculateStart();
-
-        Dimension pageDimension = null;
-        Float length = null;
-        if (endX == null || endY == null) {
-            pageDimension = getRootElement().calculateContentDimension();
-            length = line.getWidth() * 20;
+    private float calculateStartY(CalculationContext calculationContext) {
+        if (startElement != null) {
+            float y = startElement.calculateY(calculationContext);
+            float height = startElement.calculateHeight(calculationContext);
+            return y + height;
+        } else {
+            return startY;
         }
+    }
 
-        float rx, ry;
-
+    private float calculateEndX(CalculationContext calculationContext) {
+        float startX = calculateStartX(calculationContext);
+        float rx;
         if (endX == null) {
-            rx = start.getX() + length;
-            if (rx > pageDimension.getWidth()) {
-                rx = start.getX() - length;
+            float length = calculateLength();
+            rx = startX + length;
+            Element rootElement = getRootElement();
+            float rootElementContentWidth = rootElement.calculateContentWidth(calculationContext);
+            if (rx > rootElementContentWidth) {
+                rx = startX - length;
             }
         } else {
             rx = endX;
         }
+        return rx;
+    }
 
+    private float calculateEndY(CalculationContext calculationContext) {
+        float startY = calculateStartY(calculationContext);
+        float ry;
         if (endY == null) {
-            ry = start.getY() + length;
-            if (ry > pageDimension.getHeight()) {
-                ry = start.getY() - length;
+            float length = calculateLength();
+            ry = startY + length;
+            Element rootElement = getRootElement();
+            float rootElementContentHeight = rootElement.calculateContentHeight(calculationContext);
+            if (ry > rootElementContentHeight) {
+                ry = startY - length;
             }
         } else {
             ry = endY;
         }
-
-        return new Point(rx, ry);
+        return ry;
     }
 
-    protected ParentElement getRootElement() {
-        ParentElement parent = this.getParent();
+    private float calculateLength() {
+        return line.getWidth() * 20;
+    }
+
+    private Element getRootElement() {
+        ParentElement<?> parent = this.getParent();
         while (parent instanceof ChildElement) {
-            parent = ((ChildElement) parent).getParent();
+            parent = ((ChildElement<?>) parent).getParent();
         }
         return parent;
     }
 
-    public String toStringCoordinates() {
-        Point start = calculateStart();
-        Point end = calculateEnd();
-        return "[startX, startY], [endX, endY] = " + start + ", " + end +
-                ", [pdfStartX, pdfStartY], [pdfEndX, pdfEndY] = " + parent.convertPointToPdfCoordinates(start) + ", " + parent.convertPointToPdfCoordinates(end);
+    @Override
+    public float calculateX(CalculationContext calculationContext) {
+        return Math.min(calculateStartX(calculationContext), calculateEndX(calculationContext));
+    }
+
+    @Override
+    public float calculateY(CalculationContext calculationContext) {
+        return Math.min(calculateStartY(calculationContext), calculateEndY(calculationContext));
+    }
+
+    @Override
+    public float calculateWidth(CalculationContext calculationContext) {
+        return Math.abs(calculateStartX(calculationContext) - calculateEndX(calculationContext));
+    }
+
+    @Override
+    public float calculateHeight(CalculationContext calculationContext) {
+        return Math.abs(calculateStartY(calculationContext) - calculateEndY(calculationContext));
+    }
+
+    @Override
+    public float calculateContentX(CalculationContext calculationContext) {
+        return calculateX(calculationContext);
+    }
+
+    @Override
+    public float calculateContentY(CalculationContext calculationContext) {
+        return calculateY(calculationContext);
+    }
+
+    @Override
+    public float calculateContentWidth(CalculationContext calculationContext) {
+        return calculateWidth(calculationContext);
+    }
+
+    @Override
+    public float calculateContentHeight(CalculationContext calculationContext) {
+        return calculateHeight(calculationContext);
     }
 }
