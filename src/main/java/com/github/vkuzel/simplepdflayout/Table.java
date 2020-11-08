@@ -18,6 +18,7 @@ import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Ax
 import static com.github.vkuzel.simplepdflayout.calculator.PositionCalculator.Axis.Y;
 import static com.github.vkuzel.simplepdflayout.property.Line.Style.SOLID;
 import static java.awt.Color.GRAY;
+import static java.util.Collections.emptyList;
 
 public final class Table implements ParentElement<Table>, ChildElement<Table>, ElementWithBorder, ElementWithMargin {
 
@@ -41,7 +42,9 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     private Border border = null;
 
     private TableCellConfigurer cellConfigurer;
-    private List<List<String>> data;
+    private List<List<String>> data = emptyList();
+
+    private boolean cellsGenerated = false;
 
     Table(ParentElement<?> parentElement) {
         this.parentElement = parentElement;
@@ -98,11 +101,13 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     }
 
     public Table setWidth(float width) {
+        ensureCellsAreNotGenerated();
         widthDimensionCalculator = new FixedDimensionCalculator(width);
         return this;
     }
 
     public Table setWidthPercent(float widthPercent) {
+        ensureCellsAreNotGenerated();
         widthDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, WIDTH, widthPercent);
         return this;
     }
@@ -113,11 +118,13 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     }
 
     public Table setHeight(float height) {
+        ensureCellsAreNotGenerated();
         heightDimensionCalculator = new FixedDimensionCalculator(height);
         return this;
     }
 
     public Table setHeightPercent(float heightPercent) {
+        ensureCellsAreNotGenerated();
         heightDimensionCalculator = new PercentOfParentContentDimensionCalculator(parentElement, HEIGHT, heightPercent);
         return this;
     }
@@ -166,23 +173,30 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
     }
 
     public Table setCellConfigurer(TableCellConfigurer cellConfigurer) {
+        ensureCellsAreNotGenerated();
         this.cellConfigurer = cellConfigurer;
         return this;
     }
 
     public Table setData(List<List<String>> rowsColumnsValues) {
+        ensureCellsAreNotGenerated();
         this.data = rowsColumnsValues;
         return this;
     }
 
     @Override
     public void render(RenderingContext renderingContext) {
+        generateCells(renderingContext.getCalculationContext());
         borderRenderer.render(renderingContext);
-        createCells(renderingContext.getCalculationContext());
         childrenRenderer.render(renderingContext);
     }
 
-    private void createCells(CalculationContext calculationContext) {
+    private void generateCells(CalculationContext calculationContext) {
+        if (cellsGenerated) {
+            return;
+        }
+        cellsGenerated = true;
+
         int noOfRows = data.size();
         int noOfColumns = data.isEmpty() || data.get(0).isEmpty() ? 0 : data.get(0).size();
 
@@ -249,6 +263,12 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
         cell.setBorder(Border.of(top, line, line, left));
     }
 
+    private void ensureCellsAreNotGenerated() {
+        if (cellsGenerated) {
+            throw new IllegalStateException("Table cells are generated, modification is not allowed!");
+        }
+    }
+
     @Override
     public ParentElement<?> getParent() {
         return parentElement;
@@ -301,21 +321,25 @@ public final class Table implements ParentElement<Table>, ChildElement<Table>, E
 
     @Override
     public float calculateWidth(CalculationContext calculationContext) {
+        generateCells(calculationContext);
         return widthDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
     public float calculateHeight(CalculationContext calculationContext) {
+        generateCells(calculationContext);
         return heightDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
     public float calculateContentWidth(CalculationContext calculationContext) {
+        generateCells(calculationContext);
         return widthContentDimensionCalculator.calculate(calculationContext);
     }
 
     @Override
     public float calculateContentHeight(CalculationContext calculationContext) {
+        generateCells(calculationContext);
         return heightContentDimensionCalculator.calculate(calculationContext);
     }
 
