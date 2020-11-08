@@ -21,7 +21,7 @@ A library which makes it easier to manually create a simple PDF document with [A
     }
     
     dependencies {
-        implementation("com.github.vkuzel:Simple-PDF-Layout:2.0.0")
+        implementation("com.github.vkuzel:Simple-PDF-Layout:2.1.0")
     }
     ```
 
@@ -46,6 +46,6 @@ A library which makes it easier to manually create a simple PDF document with [A
 
 ## Box model
 
-Following image was drawn by `BoxModelDocumentTest.generateBoxModelDocumentTest()` method in this project.
+Following image was rendered by `BoxModelDocumentTest.generateBoxModelDocumentTest()` method in this project.
 
 ![Document box model](document-box-model.png)
