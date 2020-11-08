@@ -51,7 +51,8 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     private String text;
     private Font font = Font.helvetica();
     private float fontSize = 11;
-    private String linesSplitRegex = "\\r?\\n";
+    private String paragraphsSplitRegex = "\\r?\\n";
+    private float paragraphSpacing = 8;
     private float firstLineLeftOffset = 0;
     private Float lineMaxWidth = null;
     private String lineWrapString = " ";
@@ -210,8 +211,13 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
         return this;
     }
 
-    public Text setLineSplitRegex(String linesSplitRegex) {
-        this.linesSplitRegex = linesSplitRegex;
+    public Text setParagraphsSplitRegex(String paragraphsSplitRegex) {
+        this.paragraphsSplitRegex = paragraphsSplitRegex;
+        return this;
+    }
+
+    public Text setParagraphSpacing(float paragraphSpacing) {
+        this.paragraphSpacing = paragraphSpacing;
         return this;
     }
 
@@ -265,28 +271,28 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
     private void renderText(RenderingContext renderingContext) {
         Point contentTopLeft = calculateContentTopLeft();
         float width = calculateContentWidth(renderingContext.getCalculationContext());
-        List<String> lines = getLines();
+        List<TextLine> lines = getLines();
 
-        try {
-            for (int i = 0; i < lines.size(); i++) {
-                String line = lines.get(i);
-                if ("".equals(line)) {
-                    continue;
-                }
+        float ty = contentTopLeft.getY();
 
-                float tx = contentTopLeft.getX();
-                float ty = contentTopLeft.getY() + (i + 1) * lineHeight;
-                if (alignment == Alignment.LEFT) {
-                    tx += i == 0 ? firstLineLeftOffset : 0;
-                } else {
-                    float textWidth = calculateTextWidth(line);
-                    if (alignment == Alignment.RIGHT) {
-                        tx += width - textWidth;
-                    } else if (alignment == Alignment.CENTER) {
-                        tx += (width - textWidth) / 2;
-                    }
-                }
+        for (TextLine line : lines) {
+            String text = line.getText();
 
+            float tx = contentTopLeft.getX() + line.getLeftOffset();
+            ty += lineHeight + line.getMarginTop();
+            if (alignment == Alignment.RIGHT) {
+                float textWidth = calculateTextWidth(line.getText());
+                tx += width - textWidth;
+            } else if (alignment == Alignment.CENTER) {
+                float textWidth = calculateTextWidth(line.getText());
+                tx += (width - textWidth) / 2;
+            }
+
+            if ("".equals(text)) {
+                continue;
+            }
+
+            try {
                 Point textBottomLeft = Point.of(tx, ty);
                 Point pdfTextBottomLeft = parentElement.convertPointToPdfCoordinates(textBottomLeft);
 
@@ -295,26 +301,31 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
                 contentStream.setFont(font.getPdFont(), fontSize);
                 contentStream.setNonStrokingColor(color);
                 contentStream.newLineAtOffset(pdfTextBottomLeft.getX(), pdfTextBottomLeft.getY());
-                contentStream.showText(line);
+                contentStream.showText(text);
                 contentStream.endText();
+            } catch (IOException e) {
+                throw new IllegalStateException("Line " + text + " cannot be rendered!", e);
             }
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
         }
     }
 
-    private List<String> getLines() {
-        String[] potentialLines = text.split(linesSplitRegex);
-        List<String> lines = new ArrayList<>();
-        for (int i = 0; i < potentialLines.length; i++) {
-            String potentialLine = potentialLines[i];
-            List<String> wrappedLines = wrapLine(potentialLine, i == 0);
-            lines.addAll(wrappedLines);
+    private List<TextLine> getLines() {
+        boolean firstLine = true;
+        float marginTop = 0;
+        List<TextLine> lines = new ArrayList<>();
+        for (String paragraph : text.split(paragraphsSplitRegex)) {
+            for (String text : wrapLines(paragraph, firstLine)) {
+                float leftOffset = firstLine ? firstLineLeftOffset : 0;
+                lines.add(new TextLine(text, marginTop, leftOffset));
+                firstLine = false;
+                marginTop = 0;
+            }
+            marginTop = paragraphSpacing;
         }
         return lines;
     }
 
-    private List<String> wrapLine(String text, boolean firstLine) {
+    private List<String> wrapLines(String text, boolean firstLine) {
         float textWidth = calculateTextWidth(text);
         if (firstLine) {
             textWidth += firstLineLeftOffset;
@@ -422,8 +433,8 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
         @Override
         public float calculate(CalculationContext calculationContext) {
             float width = 0;
-            for (String line : Text.this.getLines()) {
-                float lineWidth = Text.this.calculateTextWidth(line);
+            for (TextLine line : Text.this.getLines()) {
+                float lineWidth = Text.this.calculateTextWidth(line.getText()) + line.getLeftOffset();
                 if (lineWidth > width) {
                     width = lineWidth;
                 }
@@ -437,9 +448,37 @@ public final class Text implements ChildElement<Text>, ElementWithMargin, Elemen
 
         @Override
         public float calculate(CalculationContext calculationContext) {
-            float height = getLines().size() * lineHeight;
+            float height = 0;
+            for (TextLine line : getLines()) {
+                height += lineHeight + line.getMarginTop();
+            }
             height += sumVerticalMarginBorderPadding(Text.this);
             return height;
+        }
+    }
+
+    private static class TextLine {
+
+        private final String text;
+        private final float marginTop;
+        private final float leftOffset;
+
+        public TextLine(String text, float marginTop, float leftOffset) {
+            this.text = text;
+            this.marginTop = marginTop;
+            this.leftOffset = leftOffset;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public float getMarginTop() {
+            return marginTop;
+        }
+
+        public float getLeftOffset() {
+            return leftOffset;
         }
     }
 }

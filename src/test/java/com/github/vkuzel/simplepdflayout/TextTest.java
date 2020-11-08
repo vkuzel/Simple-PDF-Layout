@@ -12,7 +12,7 @@ public class TextTest {
     private static final Page ANY_PAGE = Page.a4();
 
     @Test
-    void textIsProperlyWrapped() {
+    void textIsCorrectlyWrapped() {
         // given
         float firstLineOffset = 30;
         float maxWidth = 60;
@@ -26,6 +26,23 @@ public class TextTest {
 
         // then
         assertTrue(width <= maxWidth);
+    }
+
+    @Test
+    void paragraphSpacingIsCorrectlyCalculated() {
+        // given
+        float lineHeight = 10;
+        float paragraphSpacing = 5;
+        Text text = new Text(ANY_PAGE)
+                .setText("Paragraph #1\nParagraph #2")
+                .setLineHeight(lineHeight)
+                .setParagraphSpacing(paragraphSpacing);
+
+        // when
+        float height = text.calculateHeight(new CalculationContext());
+
+        // then
+        assertEquals(25, height);
     }
 
     @Test
