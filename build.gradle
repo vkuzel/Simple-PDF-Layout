@@ -11,8 +11,8 @@ repositories {
 }
 
 dependencies {
-    compile("org.apache.pdfbox:pdfbox:2.0.21")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    api('org.apache.pdfbox:pdfbox:2.0.24')
+    testImplementation('org.junit.jupiter:junit-jupiter:5.9.0')
 }
 
 publishing {
@@ -20,9 +20,13 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.github.vkuzel'
             artifactId = 'simple-pdf-layout'
-            version = '2.0.0'
+            version = '2.1.2'
 
             from components.java
         }
     }
+}
+
+test {
+    useJUnitPlatform()
 }
